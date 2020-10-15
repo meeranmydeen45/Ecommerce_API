@@ -41,6 +41,8 @@ namespace Ecommerce_NetCore_API
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();

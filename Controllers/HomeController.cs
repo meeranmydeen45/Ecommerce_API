@@ -122,11 +122,54 @@ namespace Ecommerce_NetCore_API.Controllers
 
         }
 
-        
 
+         //Get List of Available Products to Display in the AddProduct Page
+        [HttpGet("getstocks")]
+        public ActionResult<List<ProductsInStock>> GetProdctsInStock()
+        {
+            List<ProductsInStock> productsInStocks = new List<ProductsInStock>();
+            var products = _context.products.ToList();
+            foreach(ProductTE prod in products)
+            {
+                ProductsInStock productsInStock = new ProductsInStock();
+                productsInStock.Id = prod.Id;
+                productsInStock.ProductName = prod.ProductName;
+                productsInStock.ProductImage = prod.ImagePath;
+                var stockBySize = _context.stocks.Where(x => x.ProductId == prod.Id).ToList();
+                List<StockTE> stockTEs = new List<StockTE>();
 
+                foreach(StockTE stock in stockBySize)
+                {
+                    StockTE stockTE = new StockTE();
+                    stockTE.Id = stock.Id;
+                    stockTE.Quantity = stock.Quantity;
+                    stockTE.Size = stock.Size;
+                    stockTE.Cost = stock.Cost;
+                    stockTE.ProductId = stock.ProductId;
 
+                    stockTEs.Add(stockTE);
+                }
 
+                productsInStock.listOfstocksBySize = stockTEs;
+                productsInStocks.Add(productsInStock);
+            }
+
+            return Ok(productsInStocks);
+        }
+
+        [HttpPost("pruchase")]
+        public ActionResult<string> PurchaseStock(List<CartItems> cartItems) 
+        {
+            foreach(CartItems item in cartItems)
+            {
+             StockTE stockTE  = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
+             stockTE.Quantity = stockTE.Quantity - item.Quantity;
+              _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+              _context.SaveChanges();
+            }
+
+            return Ok("Successfulley finished tx");
+        }
 
     }
 }
