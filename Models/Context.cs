@@ -17,6 +17,7 @@ namespace Ecommerce_NetCore_API.Models
         public DbSet<ProductTE> products { get; set; }
         public DbSet<ProdAddHistoryTE> prodAddHistoryData { get; set; }
         public DbSet<StockTE> stocks { get; set; }
+        public DbSet<BillDataTE> bills { get; set; }
 
 
     }

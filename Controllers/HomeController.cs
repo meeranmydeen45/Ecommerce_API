@@ -7,6 +7,7 @@ using Ecommerce_NetCore_API.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Ecommerce_NetCore_API.Controllers
 {
@@ -169,6 +170,28 @@ namespace Ecommerce_NetCore_API.Controllers
             }
 
             return Ok("Successfulley finished tx");
+        }
+
+        [HttpPost("pdfdata")]
+        public ActionResult<string> StorePDF([FromForm]PDFData formData)
+        {
+            string Base64 = formData.base64;
+            byte[] byteArray = Convert.FromBase64String(Base64);
+            BillDataTE billDataTE = new BillDataTE();
+           //  billDataTE.Id = 1;
+           billDataTE.BillNumber = 102;
+            billDataTE.BillAmount = 145000;
+            billDataTE.BillDate = DateTime.Now;
+            billDataTE.BillByteArray = byteArray;
+            billDataTE.CustomerId = 001;
+            _context.Add(billDataTE);
+            _context.SaveChanges();
+
+
+          byte[] byteArray2  = _context.bills.Single(x => x.Id == 10).BillByteArray;
+          string Base642 = Convert.ToBase64String(byteArray2);
+
+            return Ok(Base642);
         }
 
     }
