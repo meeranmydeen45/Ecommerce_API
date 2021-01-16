@@ -190,7 +190,7 @@ namespace Ecommerce_NetCore_API.Controllers
 
           byte[] byteArray2  = _context.bills.Single(x => x.Id == 10).BillByteArray;
           string Base642 = Convert.ToBase64String(byteArray2);
-
+            string test = "Git Test";
             return Ok(Base642);
         }
 
