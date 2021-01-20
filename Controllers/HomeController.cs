@@ -90,7 +90,7 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
         { 
-            var prod = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == formData.Name.ToLower() && x.CategoryId == Convert.ToInt16(formData.Catergory));
+            var prod = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == formData.Name.Trim().ToLower() && x.CategoryId == Convert.ToInt16(formData.Catergory));
             if(prod != null)
             {
                 ProdAddHistoryTE addprod = new ProdAddHistoryTE();
@@ -112,6 +112,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 formData.ImageFile.CopyTo(new FileStream(FilePath, FileMode.Create));
 
                 ProductTE product = new ProductTE();
+                product.CategoryId = Convert.ToInt16(formData.Catergory);
                 product.ProductName = formData.Name;
                 product.ImagePath = UniqueFileName;
 
