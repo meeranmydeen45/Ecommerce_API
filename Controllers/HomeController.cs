@@ -33,12 +33,64 @@ namespace Ecommerce_NetCore_API.Controllers
 
         }
 
+        [HttpGet("getcategory")]
+        public ActionResult<List<ProdAddCategoryTE>> GetCategories()
+        {
+            List<ProdAddCategoryTE> categories = _context.categories.ToList();
+            return Ok(categories);
+        }
+
+        [HttpPost("addcategory")]
+        public ActionResult<String> AddNewCategory([FromForm]ProdAddCategoryTE fromData)
+        {
+            if (fromData.CategoryName != null)
+            {
+            ProdAddCategoryTE categoryName =  _context.categories.SingleOrDefault(x => x.CategoryName.ToLower() == fromData.CategoryName.ToLower());
+            if(categoryName == null)
+                {
+                    _context.Add(fromData);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    return Ok("Exist Already!");
+                }
+            }
+            else
+            {
+                return Ok("Please provide Valid Data!");
+            }
+            return Ok("Data Saved Successfully!");
+
+        }
+
+        [HttpPost("getproductbyid")]
+        public ActionResult<List<ProductWithCategoryIdsTE>> GetProductById([FromForm]ProductWithCategoryIdsTE data)
+        {
+            List<ProductWithCategoryIdsTE> products = _context.productWithCategoryIds.Where(x => x.CategoryId == data.Id).ToList<ProductWithCategoryIdsTE>();
+            return Ok(products);
+        }
+
+        [HttpPost("addnewproduct")]
+        public ActionResult<String> AddNewProduct([FromForm]ProductWithCategoryIdsTE productWithCategoryId)
+        {
+           ProductWithCategoryIdsTE product =  _context.productWithCategoryIds.SingleOrDefault(x => x.ProductName == productWithCategoryId.ProductName.ToLower());
+           if(product == null)
+            {
+                _context.Add(productWithCategoryId);
+                _context.SaveChanges();
+            }
+            else
+            {
+                return Ok("Name Exist Already");
+            }
+            return Ok("Saved Successfully!");
+        }
+
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
-        {
-            
-            int id = 2;
-            var prod = _context.products.SingleOrDefault(x => x.Id == id);
+        { 
+            var prod = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == formData.Name.ToLower() && x.CategoryId == Convert.ToInt16(formData.Catergory));
             if(prod != null)
             {
                 ProdAddHistoryTE addprod = new ProdAddHistoryTE();
