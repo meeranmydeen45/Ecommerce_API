@@ -21,6 +21,8 @@ namespace Ecommerce_NetCore_API.Models
         public DbSet<StockTE> stocks { get; set; }
         public DbSet<BillDataTE> bills { get; set; }
 
+        public DbSet<LoginDataTE> loginDatas { get; set; }
+
 
     }
 }

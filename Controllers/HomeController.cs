@@ -87,6 +87,39 @@ namespace Ecommerce_NetCore_API.Controllers
             return Ok("Saved Successfully!");
         }
 
+        [HttpPost("newuser-registration")]
+        public ActionResult<string> UserRegistration([FromForm] LoginDataTE loginData) 
+        {
+            if(loginData.username != null & loginData.password != null)
+            {
+                _context.Add(loginData);
+                _context.SaveChanges();
+                return Ok("Registration Done successfully");
+
+            }
+            else
+            {
+                return Ok("Please check the details!!");
+            }
+            
+        
+        }
+
+        [HttpPost("uservalidation")]
+        public ActionResult<LoginDataTE> UserValidation([FromForm] LoginDataTE loginData)
+        {
+        var userObject =  _context.loginDatas.SingleOrDefault(x => x.username.ToLower() == loginData.username.ToLower().Trim() && x.password == loginData.password.ToLower().Trim());
+        if(userObject != null)
+        {
+                return Ok(userObject);    
+        }
+        else
+        {
+                return Ok("Incorrect Details!!");
+            }
+        }
+
+
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
         { 
@@ -243,7 +276,6 @@ namespace Ecommerce_NetCore_API.Controllers
 
           byte[] byteArray2  = _context.bills.Single(x => x.Id == 10).BillByteArray;
           string Base642 = Convert.ToBase64String(byteArray2);
-            string test = "Git Test02";
             return Ok(Base642);
         }
 
