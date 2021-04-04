@@ -41,12 +41,12 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("addcategory")]
-        public ActionResult<String> AddNewCategory([FromForm]ProdAddCategoryTE fromData)
+        public ActionResult<String> AddNewCategory([FromForm] ProdAddCategoryTE fromData)
         {
             if (fromData.CategoryName != null)
             {
-            ProdAddCategoryTE categoryName =  _context.categories.SingleOrDefault(x => x.CategoryName.ToLower() == fromData.CategoryName.ToLower());
-            if(categoryName == null)
+                ProdAddCategoryTE categoryName = _context.categories.SingleOrDefault(x => x.CategoryName.ToLower() == fromData.CategoryName.ToLower());
+                if (categoryName == null)
                 {
                     _context.Add(fromData);
                     _context.SaveChanges();
@@ -65,17 +65,17 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("getproductbyid")]
-        public ActionResult<List<ProductWithCategoryIdsTE>> GetProductById([FromForm]ProductWithCategoryIdsTE data)
+        public ActionResult<List<ProductWithCategoryIdsTE>> GetProductById([FromForm] ProductWithCategoryIdsTE data)
         {
             List<ProductWithCategoryIdsTE> products = _context.productWithCategoryIds.Where(x => x.CategoryId == data.Id).ToList<ProductWithCategoryIdsTE>();
             return Ok(products);
         }
 
         [HttpPost("addnewproduct")]
-        public ActionResult<String> AddNewProduct([FromForm]ProductWithCategoryIdsTE productWithCategoryId)
+        public ActionResult<String> AddNewProduct([FromForm] ProductWithCategoryIdsTE productWithCategoryId)
         {
-           ProductWithCategoryIdsTE product =  _context.productWithCategoryIds.SingleOrDefault(x => x.ProductName == productWithCategoryId.ProductName.ToLower());
-           if(product == null)
+            ProductWithCategoryIdsTE product = _context.productWithCategoryIds.SingleOrDefault(x => x.ProductName == productWithCategoryId.ProductName.ToLower());
+            if (product == null)
             {
                 _context.Add(productWithCategoryId);
                 _context.SaveChanges();
@@ -88,9 +88,9 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("newuser-registration")]
-        public ActionResult<string> UserRegistration([FromForm] LoginDataTE loginData) 
+        public ActionResult<string> UserRegistration([FromForm] LoginDataTE loginData)
         {
-            if(loginData.username != null & loginData.password != null)
+            if (loginData.username != null & loginData.password != null)
             {
                 _context.Add(loginData);
                 _context.SaveChanges();
@@ -101,20 +101,20 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 return Ok("Please check the details!!");
             }
-            
-        
+
+
         }
 
         [HttpPost("uservalidation")]
         public ActionResult<LoginDataTE> UserValidation([FromForm] LoginDataTE loginData)
         {
-        var userObject =  _context.loginDatas.SingleOrDefault(x => x.username.ToLower() == loginData.username.ToLower().Trim() && x.password == loginData.password.ToLower().Trim());
-        if(userObject != null)
-        {
-                return Ok(userObject);    
-        }
-        else
-        {
+            var userObject = _context.loginDatas.SingleOrDefault(x => x.username.ToLower() == loginData.username.ToLower().Trim() && x.password == loginData.password.ToLower().Trim());
+            if (userObject != null)
+            {
+                return Ok(userObject);
+            }
+            else
+            {
                 return Ok("Incorrect Details!!");
             }
         }
@@ -122,9 +122,9 @@ namespace Ecommerce_NetCore_API.Controllers
 
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
-        { 
+        {
             var prod = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == formData.Name.Trim().ToLower() && x.CategoryId == Convert.ToInt16(formData.Catergory));
-            if(prod != null)
+            if (prod != null)
             {
                 ProdAddHistoryTE addprod = new ProdAddHistoryTE();
                 addprod.Quantity = formData.Quantity;
@@ -165,9 +165,9 @@ namespace Ecommerce_NetCore_API.Controllers
 
             }
 
-            
+
             var prodDataToGByQtySize = _context.prodAddHistoryData.ToList();
-            var prodGByQtySize =   prodDataToGByQtySize.GroupBy(x => new { x.ProductId, x.Size }).Select(x => new
+            var prodGByQtySize = prodDataToGByQtySize.GroupBy(x => new { x.ProductId, x.Size }).Select(x => new
             {
                 ProductID = x.Key.ProductId,
                 Size = x.Key.Size,
@@ -175,15 +175,15 @@ namespace Ecommerce_NetCore_API.Controllers
                 AvgCost = x.Sum(x => x.Cost) / x.Count()
 
             }).ToList();
-         //   _context.Dispose();
+            //   _context.Dispose();
 
             foreach (var product in prodGByQtySize)
             {
 
-             var ExistingProduct = _context.stocks.SingleOrDefault(x => x.ProductId == product.ProductID && x.Size == product.Size);
+                var ExistingProduct = _context.stocks.SingleOrDefault(x => x.ProductId == product.ProductID && x.Size == product.Size);
                 if (ExistingProduct != null)
                 {
-                    
+
                     ExistingProduct.Quantity = product.TotalQuantity;
                     ExistingProduct.Cost = product.AvgCost;
                     _context.Entry(ExistingProduct).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
@@ -203,20 +203,20 @@ namespace Ecommerce_NetCore_API.Controllers
 
 
             }
-        
+
 
             return Ok("Data Posted Successfully");
 
         }
 
 
-         //Get List of Available Products to Display in the AddProduct Page
+        //Get List of Available Products to Display in the AddProduct Page
         [HttpGet("getstocks")]
         public ActionResult<List<ProductsInStock>> GetProdctsInStock()
         {
             List<ProductsInStock> productsInStocks = new List<ProductsInStock>();
             var products = _context.products.ToList();
-            foreach(ProductTE prod in products)
+            foreach (ProductTE prod in products)
             {
                 ProductsInStock productsInStock = new ProductsInStock();
                 productsInStock.Id = prod.Id;
@@ -225,7 +225,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 var stockBySize = _context.stocks.Where(x => x.ProductId == prod.Id).ToList();
                 List<StockTE> stockTEs = new List<StockTE>();
 
-                foreach(StockTE stock in stockBySize)
+                foreach (StockTE stock in stockBySize)
                 {
                     StockTE stockTE = new StockTE();
                     stockTE.Id = stock.Id;
@@ -243,6 +243,45 @@ namespace Ecommerce_NetCore_API.Controllers
 
             return Ok(productsInStocks);
         }
+
+
+
+
+        [HttpPost("is-cutomer-available")]
+        public ActionResult<string> IsCustomerAvailabe([FromForm]CustomerTE customer)
+        {
+           var isExistingCustomer = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
+           if(isExistingCustomer != null)
+            {
+                return Ok(isExistingCustomer);
+            }
+            else
+            {
+                return Ok("Mobile No.Not Registered");
+            }
+           
+        }
+
+        [HttpPost("customer-registration")]
+        public ActionResult<string> CustomerRegistration([FromForm]CustomerTE customer)
+        {
+            CustomerTE isExistingCustomer = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
+            if(isExistingCustomer == null)
+            {
+                _context.Add(customer);
+                _context.SaveChanges(); 
+            }
+            else
+            {
+                isExistingCustomer.customermobile = customer.customermobile;
+                isExistingCustomer.Customeraddress = customer.Customeraddress;
+                _context.Entry(isExistingCustomer).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            }
+
+            return Ok("Data");
+        }
+
 
         [HttpPost("pruchase")]
         public ActionResult<string> PurchaseStock(List<CartItems> cartItems) 
