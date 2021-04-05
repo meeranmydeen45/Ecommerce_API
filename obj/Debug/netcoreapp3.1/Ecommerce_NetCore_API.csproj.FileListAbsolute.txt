@@ -120,3 +120,9 @@ D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.pdb
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.genruntimeconfig.cache
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\EntityFramework.SqlServer.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\EntityFramework.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.CodeDom.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.Data.SqlClient.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll

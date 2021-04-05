@@ -60,6 +60,9 @@ namespace Ecommerce_NetCore_API.Migrations
                     b.Property<string>("Customeraddress")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CutomerId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Totalamount")
                         .HasColumnType("nvarchar(max)");
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Objects.DataClasses;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -248,10 +249,10 @@ namespace Ecommerce_NetCore_API.Controllers
 
 
         [HttpPost("is-cutomer-available")]
-        public ActionResult<string> IsCustomerAvailabe([FromForm]CustomerTE customer)
+        public ActionResult<string> IsCustomerAvailabe([FromForm] CustomerTE customer)
         {
-           var isExistingCustomer = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
-           if(isExistingCustomer != null)
+            var isExistingCustomer = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
+            if (isExistingCustomer != null)
             {
                 return Ok(isExistingCustomer);
             }
@@ -259,29 +260,45 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 return Ok("Mobile No.Not Registered");
             }
-           
+
         }
 
         [HttpPost("customer-registration")]
-        public ActionResult<string> CustomerRegistration([FromForm]CustomerTE customer)
+        public ActionResult<string> CustomerRegistration([FromForm] CustomerTE customer)
         {
-            CustomerTE isExistingCustomer = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
-            if(isExistingCustomer == null)
+            bool Notempty = _context.customers.Any();     // Whether table Empty
+            if (Notempty)
             {
-                _context.Add(customer);
-                _context.SaveChanges(); 
+                int MaxIdValue = _context.customers.Max(x => x.Id);
+                CustomerTE CustwithMaxId = _context.customers.Single(x => x.Id == MaxIdValue);
+                CustomerTE IsExistingCust = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
+                if (IsExistingCust != null)
+                {
+                    //If customer Mob. Match with Existing Cust. Just update Mobile No. and Address
+                    IsExistingCust.customermobile = customer.customermobile;
+                    IsExistingCust.Customeraddress = customer.Customeraddress;
+                    _context.Entry(IsExistingCust).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    //If will get Last row CustId and Increase it By 1 and update CustId with New Customer
+                    customer.CutomerId = (Convert.ToInt32(CustwithMaxId.CutomerId) + 1).ToString();
+                    _context.Add(customer);
+                    _context.SaveChanges();
+                }
             }
+            // If there is no row in Cust. Table
             else
             {
-                isExistingCustomer.customermobile = customer.customermobile;
-                isExistingCustomer.Customeraddress = customer.Customeraddress;
-                _context.Entry(isExistingCustomer).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-
+                int custId = 10100001;
+                customer.CutomerId = custId.ToString();
+                _context.Add(customer);
+                _context.SaveChanges();
             }
-
-            return Ok("Data");
+            return Ok("Saved");
         }
-
+    
 
         [HttpPost("pruchase")]
         public ActionResult<string> PurchaseStock(List<CartItems> cartItems) 

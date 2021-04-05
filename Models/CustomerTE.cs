@@ -11,10 +11,10 @@ namespace Ecommerce_NetCore_API.Models
         public int Id { get; set; }
         [Required]
         public string customermobile { get; set; }
-
         [Required]
         public string CustomerName { get; set; }
         public string Customeraddress { get; set; }
         public string Totalamount { get; set; }
+        public string CutomerId { get; set; }
     }
 }
