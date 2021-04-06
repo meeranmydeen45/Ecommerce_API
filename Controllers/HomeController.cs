@@ -305,6 +305,8 @@ namespace Ecommerce_NetCore_API.Controllers
         {
             foreach(CartItems item in cartItems)
             {
+
+
              StockTE stockTE  = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
              stockTE.Quantity = stockTE.Quantity - item.Quantity;
               _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
