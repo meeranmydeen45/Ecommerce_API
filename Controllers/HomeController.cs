@@ -283,7 +283,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 else
                 {
                     //If will get Last row CustId and Increase it By 1 and update CustId with New Customer
-                    customer.CutomerId = (Convert.ToInt32(CustwithMaxId.CutomerId) + 1).ToString();
+                    customer.CustomerId = (Convert.ToInt32(CustwithMaxId.CustomerId) + 1).ToString();
                     _context.Add(customer);
                     _context.SaveChanges();
                 }
@@ -292,7 +292,7 @@ namespace Ecommerce_NetCore_API.Controllers
             else
             {
                 int custId = 10100001;
-                customer.CutomerId = custId.ToString();
+                customer.CustomerId = custId.ToString();
                 _context.Add(customer);
                 _context.SaveChanges();
             }
@@ -301,9 +301,28 @@ namespace Ecommerce_NetCore_API.Controllers
     
 
         [HttpPost("pruchase")]
-        public ActionResult<string> PurchaseStock(List<CartItems> cartItems) 
+        public  ActionResult<string> PurchaseStock(CustwithOrder custwithOrder) 
         {
-            foreach(CartItems item in cartItems)
+            
+            foreach (CartItems item in custwithOrder.cartItems)
+            {
+                SalewithCustIdTE salewithCustId = new SalewithCustIdTE
+                {
+                    Productname = item.productName,
+                    Prodsize = item.size,
+                    Quantity = item.Quantity,
+                    Unitprice = item.cost,
+                    TotalCost = item.Quantity * item.cost,
+                    Purchasedate = DateTime.Now.Date,
+                    Productid = item.id,
+                    Custid = custwithOrder.customer.CustomerId
+
+                };
+                _context.Add(salewithCustId);
+                _context.SaveChanges();
+            }
+           
+            foreach (CartItems item in custwithOrder.cartItems)
             {
 
 

@@ -14,7 +14,7 @@ namespace Ecommerce_NetCore_API.Models
         [Required]
         public string CustomerName { get; set; }
         public string Customeraddress { get; set; }
-        public string Totalamount { get; set; }
-        public string CutomerId { get; set; }
+
+        public string CustomerId { get; set; }
     }
 }
