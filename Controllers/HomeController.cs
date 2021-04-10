@@ -303,7 +303,28 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("pruchase")]
         public  ActionResult<string> PurchaseStock(CustwithOrder custwithOrder) 
         {
-            
+           
+           int Billno;
+           bool Notempty = _context.bills.Any();
+           if(Notempty)
+           {
+                int MaxIdValue = _context.bills.Max(x => x.Id);
+                int LastBillNo = _context.bills.Single(x => x.Id == MaxIdValue).BillNumber;
+                Billno = LastBillNo + 1;
+
+            }
+            else
+            {
+                Billno = 801000;
+            }
+
+            CustObjwithBillNo custObjwithBillNo = new CustObjwithBillNo
+            {
+                Custwithorder = custwithOrder,
+                Billnumber = Billno
+            };
+
+
             foreach (CartItems item in custwithOrder.cartItems)
             {
                 SalewithCustIdTE salewithCustId = new SalewithCustIdTE
@@ -321,18 +342,18 @@ namespace Ecommerce_NetCore_API.Controllers
                 _context.Add(salewithCustId);
                 _context.SaveChanges();
             }
-           
+
             foreach (CartItems item in custwithOrder.cartItems)
             {
 
 
-             StockTE stockTE  = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
-             stockTE.Quantity = stockTE.Quantity - item.Quantity;
-              _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-              _context.SaveChanges();
+                StockTE stockTE = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
+                stockTE.Quantity = stockTE.Quantity - item.Quantity;
+                _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
             }
 
-            return Ok("Successfulley finished tx");
+            return Ok(custObjwithBillNo);
         }
 
         [HttpPost("pdfdata")]
