@@ -325,33 +325,7 @@ namespace Ecommerce_NetCore_API.Controllers
             };
 
 
-            foreach (CartItems item in custwithOrder.cartItems)
-            {
-                SalewithCustIdTE salewithCustId = new SalewithCustIdTE
-                {
-                    Productname = item.productName,
-                    Prodsize = item.size,
-                    Quantity = item.Quantity,
-                    Unitprice = item.cost,
-                    TotalCost = item.Quantity * item.cost,
-                    Purchasedate = DateTime.Now.Date,
-                    Productid = item.id,
-                    Custid = custwithOrder.customer.CustomerId
-
-                };
-                _context.Add(salewithCustId);
-                _context.SaveChanges();
-            }
-
-            foreach (CartItems item in custwithOrder.cartItems)
-            {
-
-
-                StockTE stockTE = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
-                stockTE.Quantity = stockTE.Quantity - item.Quantity;
-                _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                _context.SaveChanges();
-            }
+           
 
             return Ok(custObjwithBillNo);
         }
@@ -372,7 +346,7 @@ namespace Ecommerce_NetCore_API.Controllers
             _context.SaveChanges();
 
 
-          byte[] byteArray2  = _context.bills.Single(x => x.Id == 10).BillByteArray;
+          byte[] byteArray2  = _context.bills.Single(x => x.Id == 2).BillByteArray;
           string Base642 = Convert.ToBase64String(byteArray2);
             return Ok(Base642);
         }
