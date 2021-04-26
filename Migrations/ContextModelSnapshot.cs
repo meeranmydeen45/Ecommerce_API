@@ -19,31 +19,40 @@ namespace Ecommerce_NetCore_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Ecommerce_NetCore_API.Models.BillDataTE", b =>
+            modelBuilder.Entity("Ecommerce_NetCore_API.Models.BillsDatasTE", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("BillAmount")
+                    b.Property<int>("Billamount")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("BillByteArray")
+                    b.Property<byte[]>("Billbytearray")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<DateTime>("BillDate")
+                    b.Property<DateTime>("Billdate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("BillNumber")
+                    b.Property<int>("Billnumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("Customerid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Deduction")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Ispaid")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Payableamount")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("bills");
+                    b.ToTable("billscollections");
                 });
 
             modelBuilder.Entity("Ecommerce_NetCore_API.Models.CustomerTE", b =>

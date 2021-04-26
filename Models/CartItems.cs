@@ -12,8 +12,11 @@ namespace Ecommerce_NetCore_API.Models
         public string productImage { get; set; }
         public string size { get; set; }
         public int Quantity { get; set; }
+       
         public int totalQuantity { get; set; }
         public int cost { get; set; }
+
+        public int totalCost { get; set; }
     }
 }
 

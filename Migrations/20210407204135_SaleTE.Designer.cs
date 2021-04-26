@@ -21,32 +21,7 @@ namespace Ecommerce_NetCore_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Ecommerce_NetCore_API.Models.BillDataTE", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("BillAmount")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("BillByteArray")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime>("BillDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("BillNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("bills");
-                });
+            
 
             modelBuilder.Entity("Ecommerce_NetCore_API.Models.CustomerTE", b =>
                 {

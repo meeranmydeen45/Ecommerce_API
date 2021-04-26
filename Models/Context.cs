@@ -22,7 +22,7 @@ namespace Ecommerce_NetCore_API.Models
         public DbSet<CustomerTE> customers { get; set; }
         public DbSet<SalewithCustIdTE> saleswithCustomerIds { get; set; }
         public DbSet<StockTE> stocks { get; set; }
-        public DbSet<BillDataTE> bills { get; set; }
+        public DbSet<BillsDatasTE> billscollections { get; set; }
 
         
 

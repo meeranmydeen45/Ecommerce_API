@@ -303,13 +303,41 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("pruchase")]
         public  ActionResult<string> PurchaseStock(CustwithOrder custwithOrder) 
         {
-           
+            foreach (CartItems item in custwithOrder.cartItems)
+            {
+                SalewithCustIdTE salewithCustId = new SalewithCustIdTE
+                {
+                    Productname = item.productName,
+                    Prodsize = item.size,
+                    Quantity = item.Quantity,
+                    Unitprice = item.cost,
+                    TotalCost = item.Quantity * item.cost,
+                    Purchasedate = DateTime.Now.Date,
+                    Productid = item.id,
+                    Custid = custwithOrder.customer.CustomerId
+
+                };
+                _context.Add(salewithCustId);
+                _context.SaveChanges();
+            }
+
+            foreach (CartItems item in custwithOrder.cartItems)
+            {
+
+
+                StockTE stockTE = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
+                stockTE.Quantity = stockTE.Quantity - item.Quantity;
+                _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
+            
+
+            //Generate Bill No and Passing Complete Purchased Object back to FrontEnd for PDF generation
            int Billno;
-           bool Notempty = _context.bills.Any();
+           bool Notempty = _context.billscollections.Any();
            if(Notempty)
            {
-                int MaxIdValue = _context.bills.Max(x => x.Id);
-                int LastBillNo = _context.bills.Single(x => x.Id == MaxIdValue).BillNumber;
+               int MaxIdValue = _context.billscollections.Max(x => x.Id);
+                int LastBillNo = _context.billscollections.Single(x => x.Id == MaxIdValue).Billnumber;
                 Billno = LastBillNo + 1;
 
             }
@@ -317,7 +345,6 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 Billno = 801000;
             }
-
             CustObjwithBillNo custObjwithBillNo = new CustObjwithBillNo
             {
                 Custwithorder = custwithOrder,
@@ -326,29 +353,36 @@ namespace Ecommerce_NetCore_API.Controllers
 
 
            
-
+            
             return Ok(custObjwithBillNo);
         }
 
         [HttpPost("pdfdata")]
         public ActionResult<string> StorePDF([FromForm]PDFData formData)
         {
-            string Base64 = formData.base64;
+            string Base64 = formData.Base64;    
             byte[] byteArray = Convert.FromBase64String(Base64);
-            BillDataTE billDataTE = new BillDataTE();
-           //  billDataTE.Id = 1;
-           billDataTE.BillNumber = 102;
-            billDataTE.BillAmount = 145000;
-            billDataTE.BillDate = DateTime.Now;
-            billDataTE.BillByteArray = byteArray;
-            billDataTE.CustomerId = 001;
-            _context.Add(billDataTE);
+
+            BillsDatasTE Billdata = new BillsDatasTE()
+            {
+                Billnumber = formData.Billnumber,
+                Billamount = formData.Billamount,
+                Deduction = formData.Deduction,
+                Payableamount = formData.Payableamount,
+                Billbytearray = byteArray,
+                Billdate = DateTime.Now,
+                Ispaid = false,
+                Customerid = formData.Customerid
+            };
+            _context.Add(Billdata);
             _context.SaveChanges();
 
+           //int maxID = _context.billscollections.Max(x => x.Id);
+            //byte[] byteArray2  = _context.bills.Single(x => x.Id == maxID).BillByteArray;
+            //string Base642 = Convert.ToBase64String(byteArray);
 
-          byte[] byteArray2  = _context.bills.Single(x => x.Id == 2).BillByteArray;
-          string Base642 = Convert.ToBase64String(byteArray2);
-            return Ok(Base642);
+            return Ok(Base64);
+
         }
 
     }

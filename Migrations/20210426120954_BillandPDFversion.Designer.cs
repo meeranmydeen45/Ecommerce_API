@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce_NetCore_API.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20210120002907_TableRecreationF1")]
-    partial class TableRecreationF1
+    [Migration("20210426120954_BillandPDFversion")]
+    partial class BillandPDFversion
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,7 +21,90 @@ namespace Ecommerce_NetCore_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            
+            modelBuilder.Entity("Ecommerce_NetCore_API.Models.BillsDatasTE", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Billamount")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Billbytearray")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime>("Billdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Billnumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Customerid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Deduction")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Ispaid")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Payableamount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("billscollections");
+                });
+
+            modelBuilder.Entity("Ecommerce_NetCore_API.Models.CustomerTE", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Customeraddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("customermobile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("customers");
+                });
+
+            modelBuilder.Entity("Ecommerce_NetCore_API.Models.LoginDataTE", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("isLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("loginDatas");
+                });
 
             modelBuilder.Entity("Ecommerce_NetCore_API.Models.ProdAddCategoryTE", b =>
                 {
@@ -103,6 +186,42 @@ namespace Ecommerce_NetCore_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("productWithCategoryIds");
+                });
+
+            modelBuilder.Entity("Ecommerce_NetCore_API.Models.SalewithCustIdTE", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Custid")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Prodsize")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Productid")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Productname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Purchasedate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalCost")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Unitprice")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("saleswithCustomerIds");
                 });
 
             modelBuilder.Entity("Ecommerce_NetCore_API.Models.StockTE", b =>
