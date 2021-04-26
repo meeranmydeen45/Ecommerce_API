@@ -330,7 +330,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
             
-
+             }
             //Generate Bill No and Passing Complete Purchased Object back to FrontEnd for PDF generation
            int Billno;
            bool Notempty = _context.billscollections.Any();
