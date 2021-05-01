@@ -18,6 +18,8 @@ namespace Ecommerce_NetCore_API.Models
 
         public int Payableamount { get; set; }
 
+        public int Billprofit { get; set; }
+
         public Byte[] Billbytearray { get; set; }
         
         public DateTime Billdate { get; set; }

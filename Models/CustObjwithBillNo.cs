@@ -9,5 +9,7 @@ namespace Ecommerce_NetCore_API.Models
     {
         public CustwithOrder Custwithorder { get; set; }
         public int Billnumber { get; set; }
+
+        public int Billprofit { get; set; }
     }
 }

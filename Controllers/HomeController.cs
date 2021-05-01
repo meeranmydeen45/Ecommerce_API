@@ -186,7 +186,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 {
 
                     ExistingProduct.Quantity = product.TotalQuantity;
-                    ExistingProduct.Cost = product.AvgCost;
+                    ExistingProduct.Cost = product.AvgCost + 200;
                     _context.Entry(ExistingProduct).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();
                 }
@@ -194,7 +194,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 {
                     StockTE stock = new StockTE();
                     stock.Quantity = product.TotalQuantity;
-                    stock.Cost = product.AvgCost;
+                    stock.Cost = product.AvgCost + 200;
                     stock.Size = product.Size;
                     stock.ProductId = product.ProductID;
                     _context.Add(stock);
@@ -273,7 +273,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 CustomerTE CustwithMaxId = _context.customers.Single(x => x.Id == MaxIdValue);
                 CustomerTE IsExistingCust = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
                 if (IsExistingCust != null)
-                {
+                {   
                     //If customer Mob. Match with Existing Cust. Just update Mobile No. and Address
                     IsExistingCust.customermobile = customer.customermobile;
                     IsExistingCust.Customeraddress = customer.Customeraddress;
@@ -317,20 +317,48 @@ namespace Ecommerce_NetCore_API.Controllers
                     Custid = custwithOrder.customer.CustomerId
 
                 };
-                _context.Add(salewithCustId);
-                _context.SaveChanges();
+                //_context.Add(salewithCustId);
+                //_context.SaveChanges();
             }
 
             foreach (CartItems item in custwithOrder.cartItems)
             {
+                
 
 
                 StockTE stockTE = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
                 stockTE.Quantity = stockTE.Quantity - item.Quantity;
-                _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                _context.SaveChanges();
+                //_context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+               // _context.SaveChanges();
             
              }
+
+            //To Calculate Bill profit
+            List<Profitmodel> Datas = new List<Profitmodel>();
+            int Totalprofit = 0;
+            foreach (CartItems item in custwithOrder.cartItems)
+            {
+                List<Profitmodel> data = new List<Profitmodel>();
+                data = _context.prodAddHistoryData.Where(x => x.ProductId == item.id && x.Size == item.size)
+                    .GroupBy(x => new { x.ProductId, x.Size })
+                        .Select(s => new Profitmodel()
+                        {
+                            Productid = s.Key.ProductId,
+                            Size = s.Key.Size,
+                            Profit = item.cost - s.Sum(x => x.Cost) / s.Count(),
+                            Quantity = item.Quantity
+
+                        }).ToList<Profitmodel>();
+                Datas.Add(data[0]);
+            }
+            foreach(var data in Datas)
+            {
+                Totalprofit = Totalprofit +  (data.Profit * data.Quantity);
+
+            }
+            
+
+            
             //Generate Bill No and Passing Complete Purchased Object back to FrontEnd for PDF generation
            int Billno;
            bool Notempty = _context.billscollections.Any();
@@ -348,7 +376,8 @@ namespace Ecommerce_NetCore_API.Controllers
             CustObjwithBillNo custObjwithBillNo = new CustObjwithBillNo
             {
                 Custwithorder = custwithOrder,
-                Billnumber = Billno
+                Billnumber = Billno,
+                Billprofit = Totalprofit
             };
 
 
@@ -363,12 +392,17 @@ namespace Ecommerce_NetCore_API.Controllers
             string Base64 = formData.Base64;    
             byte[] byteArray = Convert.FromBase64String(Base64);
 
+            //Calculating Bill profit after dedcution of Discount %
+
+            int Accurateprofit = formData.Billprofit - formData.Deduction;
+
             BillsDatasTE Billdata = new BillsDatasTE()
             {
                 Billnumber = formData.Billnumber,
                 Billamount = formData.Billamount,
                 Deduction = formData.Deduction,
                 Payableamount = formData.Payableamount,
+                Billprofit = Accurateprofit,
                 Billbytearray = byteArray,
                 Billdate = DateTime.Now,
                 Ispaid = false,
@@ -377,11 +411,11 @@ namespace Ecommerce_NetCore_API.Controllers
             _context.Add(Billdata);
             _context.SaveChanges();
 
-           //int maxID = _context.billscollections.Max(x => x.Id);
-            //byte[] byteArray2  = _context.bills.Single(x => x.Id == maxID).BillByteArray;
-            //string Base642 = Convert.ToBase64String(byteArray);
+           int maxID = _context.billscollections.Max(x => x.Id);
+           byte[] byteArray2  = _context.billscollections.Single(x => x.Id == maxID).Billbytearray;
+           string Base642 = Convert.ToBase64String(byteArray);
 
-            return Ok(Base64);
+            return Ok(Base642);
 
         }
 

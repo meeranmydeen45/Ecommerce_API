@@ -18,6 +18,8 @@ namespace Ecommerce_NetCore_API.Models
 
        public int Payableamount { get; set; }
 
+       public int Billprofit { get; set; }
+
        public string Base64 { get; set; }
 
        public int Customerid { get; set; }
