@@ -66,24 +66,41 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("getproductbyid")]
-        public ActionResult<List<ProductWithCategoryIdsTE>> GetProductById([FromForm] ProductWithCategoryIdsTE data)
+        public ActionResult<List<ProductTE>> GetProductById([FromForm] ProductWithCategoryIdsTE data)
         {
-            List<ProductWithCategoryIdsTE> products = _context.productWithCategoryIds.Where(x => x.CategoryId == data.Id).ToList<ProductWithCategoryIdsTE>();
+            List<ProductTE> products = _context.products.Where(x => x.CategoryId == data.Id).ToList<ProductTE>();
             return Ok(products);
         }
 
         [HttpPost("addnewproduct")]
-        public ActionResult<String> AddNewProduct([FromForm] ProductWithCategoryIdsTE productWithCategoryId)
+        public ActionResult<String> AddNewProduct([FromForm] ProductWithCategoryIdsTE productData)
         {
-            ProductWithCategoryIdsTE product = _context.productWithCategoryIds.SingleOrDefault(x => x.ProductName == productWithCategoryId.ProductName.ToLower());
+            ProductTE product = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == productData.ProductName.ToLower());
             if (product == null)
             {
-                _context.Add(productWithCategoryId);
+                string UploadFolder = Path.Combine(_hostEnvironemnt.WebRootPath, "Images");
+                string UniqueName = Guid.NewGuid().ToString() + "_" + productData.Imagefile.FileName;
+                string FilePath = Path.Combine(UploadFolder, UniqueName);
+                productData.Imagefile.CopyTo(new FileStream(FilePath, FileMode.Create));
+
+                ProductTE prod = new ProductTE() {
+                    ProductName = productData.ProductName,
+                    ImagePath = UniqueName,  
+                    CategoryId = productData.CategoryId
+                };
+                _context.Add(prod);
                 _context.SaveChanges();
             }
             else
             {
-                return Ok("Name Exist Already");
+                string UploadFolder = Path.Combine(_hostEnvironemnt.WebRootPath, "Images");
+                string UniqueName = Guid.NewGuid().ToString() + "_" + productData.Imagefile;
+                string FilePath = Path.Combine(UploadFolder, UniqueName);
+                productData.Imagefile.CopyTo(new FileStream(FilePath, FileMode.Create));
+
+                product.ImagePath = UniqueName;
+                _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
             }
             return Ok("Saved Successfully!");
         }
@@ -124,50 +141,22 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
         {
-            var prod = _context.products.SingleOrDefault(x => x.ProductName.ToLower() == formData.Name.Trim().ToLower() && x.CategoryId == Convert.ToInt16(formData.Catergory));
-            if (prod != null)
-            {
-                ProdAddHistoryTE addprod = new ProdAddHistoryTE();
-                addprod.Quantity = formData.Quantity;
-                addprod.Cost = formData.Cost;
-                addprod.Size = formData.Size;
-                addprod.ProductId = prod.Id;
+            
 
-                _context.Add(addprod);
-                _context.SaveChanges();
-
-
-            }
-            else
-            {
-                string UploadFolder = Path.Combine(_hostEnvironemnt.WebRootPath, "Images");
-                string UniqueFileName = Guid.NewGuid().ToString() + "_" + formData.ImageFile.FileName;
-                string FilePath = Path.Combine(UploadFolder, UniqueFileName);
-                formData.ImageFile.CopyTo(new FileStream(FilePath, FileMode.Create));
-
-                ProductTE product = new ProductTE();
-                product.CategoryId = Convert.ToInt16(formData.Catergory);
-                product.ProductName = formData.Name;
-                product.ImagePath = UniqueFileName;
-
-                _context.Add(product);
-                _context.SaveChanges();
-
-                var ProductObj = _context.products.Single(x => x.ImagePath == UniqueFileName);
+                //var ProductObj = _context.products.Single(x => x.ImagePath == UniqueFileName);
 
                 ProdAddHistoryTE prodAddHistory = new ProdAddHistoryTE();
                 prodAddHistory.Quantity = formData.Quantity;
                 prodAddHistory.Cost = formData.Cost;
                 prodAddHistory.Size = formData.Size;
-                prodAddHistory.ProductId = ProductObj.Id;
+               // prodAddHistory.ProductId = ProductObj.Id;
 
                 _context.Add(prodAddHistory);
                 _context.SaveChanges();
 
-            }
+            
 
-
-            var prodDataToGByQtySize = _context.prodAddHistoryData.ToList();
+            /* var prodDataToGByQtySize = _context.prodAddHistoryData.ToList();
             var prodGByQtySize = prodDataToGByQtySize.GroupBy(x => new { x.ProductId, x.Size }).Select(x => new
             {
                 ProductID = x.Key.ProductId,
@@ -175,7 +164,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 TotalQuantity = x.Sum(x => x.Quantity),
                 AvgCost = x.Sum(x => x.Cost) / x.Count()
 
-            }).ToList();
+            }).ToList(); 
             //   _context.Dispose();
 
             foreach (var product in prodGByQtySize)
@@ -203,7 +192,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 }
 
 
-            }
+            } */
 
 
             return Ok("Data Posted Successfully");
