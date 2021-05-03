@@ -141,61 +141,61 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
         {
-            
-
-                //var ProductObj = _context.products.Single(x => x.ImagePath == UniqueFileName);
+               
+                 
+                var ProductObj = _context.products.Single(x => x.ProductName == formData.Name);
 
                 ProdAddHistoryTE prodAddHistory = new ProdAddHistoryTE();
                 prodAddHistory.Quantity = formData.Quantity;
                 prodAddHistory.Cost = formData.Cost;
                 prodAddHistory.Size = formData.Size;
-               // prodAddHistory.ProductId = ProductObj.Id;
+                prodAddHistory.ProductId = ProductObj.Id;
 
                 _context.Add(prodAddHistory);
                 _context.SaveChanges();
 
-            
+            //Make Effect in Stock Table once Product Registered
 
-            /* var prodDataToGByQtySize = _context.prodAddHistoryData.ToList();
-            var prodGByQtySize = prodDataToGByQtySize.GroupBy(x => new { x.ProductId, x.Size }).Select(x => new
+            var IsAnyStock = _context.stocks.Any();
+            if(IsAnyStock)
             {
-                ProductID = x.Key.ProductId,
-                Size = x.Key.Size,
-                TotalQuantity = x.Sum(x => x.Quantity),
-                AvgCost = x.Sum(x => x.Cost) / x.Count()
-
-            }).ToList(); 
-            //   _context.Dispose();
-
-            foreach (var product in prodGByQtySize)
-            {
-
-                var ExistingProduct = _context.stocks.SingleOrDefault(x => x.ProductId == product.ProductID && x.Size == product.Size);
-                if (ExistingProduct != null)
+              var StockObj =  _context.stocks.SingleOrDefault(x => x.ProductId == prodAddHistory.ProductId && x.Size == prodAddHistory.Size);
+              if(StockObj != null)
                 {
-
-                    ExistingProduct.Quantity = product.TotalQuantity;
-                    ExistingProduct.Cost = product.AvgCost + 200;
-                    _context.Entry(ExistingProduct).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    StockObj.Cost = formData.Cost + 500;
+                    StockObj.Quantity += formData.Quantity;
+                    _context.Entry(StockObj).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();
                 }
-                else
+              else
                 {
-                    StockTE stock = new StockTE();
-                    stock.Quantity = product.TotalQuantity;
-                    stock.Cost = product.AvgCost + 200;
-                    stock.Size = product.Size;
-                    stock.ProductId = product.ProductID;
+                    StockTE stock = new StockTE()
+                    {
+                        Quantity = formData.Quantity,
+                        Size = formData.Size,
+                        Cost = formData.Cost,
+                        ProductId = prodAddHistory.ProductId
+                    };
                     _context.Add(stock);
                     _context.SaveChanges();
-
                 }
+              
+            }
+            else
+            {
+                //One Time Execution to Create Stock Table with data
+                StockTE stock = new StockTE()
+                {
+                    Quantity = formData.Quantity,
+                    Size = formData.Size,
+                    Cost = formData.Cost,
+                    ProductId = prodAddHistory.ProductId
+                };
+                _context.Add(stock);
+                _context.SaveChanges();
 
-
-            } */
-
-
-            return Ok("Data Posted Successfully");
+            }
+         return Ok("Data Posted Successfully");
 
         }
 
@@ -213,28 +213,31 @@ namespace Ecommerce_NetCore_API.Controllers
                 productsInStock.ProductName = prod.ProductName;
                 productsInStock.ProductImage = prod.ImagePath;
                 var stockBySize = _context.stocks.Where(x => x.ProductId == prod.Id).ToList();
-                List<StockTE> stockTEs = new List<StockTE>();
+                if(stockBySize.Count > 0) {
 
-                foreach (StockTE stock in stockBySize)
-                {
-                    StockTE stockTE = new StockTE();
-                    stockTE.Id = stock.Id;
-                    stockTE.Quantity = stock.Quantity;
-                    stockTE.Size = stock.Size;
-                    stockTE.Cost = stock.Cost;
-                    stockTE.ProductId = stock.ProductId;
+                    List<StockTE> stockTEs = new List<StockTE>();
 
-                    stockTEs.Add(stockTE);
+                    foreach (StockTE stock in stockBySize)
+                    {
+                        StockTE stockTE = new StockTE();
+                        stockTE.Id = stock.Id;
+                        stockTE.Quantity = stock.Quantity;
+                        stockTE.Size = stock.Size;
+                        stockTE.Cost = stock.Cost;
+                        stockTE.ProductId = stock.ProductId;
+
+                        stockTEs.Add(stockTE);
+                    }
+
+                    productsInStock.listOfstocksBySize = stockTEs;
+                    productsInStocks.Add(productsInStock);
+
                 }
-
-                productsInStock.listOfstocksBySize = stockTEs;
-                productsInStocks.Add(productsInStock);
+               
             }
 
             return Ok(productsInStocks);
         }
-
-
 
 
         [HttpPost("is-cutomer-available")]
@@ -306,8 +309,8 @@ namespace Ecommerce_NetCore_API.Controllers
                     Custid = custwithOrder.customer.CustomerId
 
                 };
-                //_context.Add(salewithCustId);
-                //_context.SaveChanges();
+                _context.Add(salewithCustId);
+                _context.SaveChanges();
             }
 
             foreach (CartItems item in custwithOrder.cartItems)
@@ -317,8 +320,8 @@ namespace Ecommerce_NetCore_API.Controllers
 
                 StockTE stockTE = _context.stocks.Single(x => x.ProductId == item.id && x.Size == item.size);
                 stockTE.Quantity = stockTE.Quantity - item.Quantity;
-                //_context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-               // _context.SaveChanges();
+                _context.Entry(stockTE).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
             
              }
 
