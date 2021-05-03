@@ -13,6 +13,12 @@ namespace Ecommerce_NetCore_API.Models
         public string ProductName { get; set; }
 
         [NotMapped]
+        public string ProductSize { get; set; }
+
+        [NotMapped]
+        public int Cost { get; set; }
+
+        [NotMapped]
         public IFormFile Imagefile { get; set; }
         public int CategoryId { get; set; }
     }
