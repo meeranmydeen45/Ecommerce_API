@@ -403,6 +403,16 @@ namespace Ecommerce_NetCore_API.Controllers
             _context.Add(Billdata);
             _context.SaveChanges();
 
+            BillsPendingTE billPending = new BillsPendingTE()
+            {
+                Pendingamount = formData.Payableamount,
+                Billnumber = formData.Billnumber,
+                Iscompleted = false,
+                Customerid = formData.Customerid,
+            };
+            _context.Add(billPending);
+            _context.SaveChanges();
+
            int maxID = _context.billscollections.Max(x => x.Id);
            byte[] byteArray2  = _context.billscollections.Single(x => x.Id == maxID).Billbytearray;
            string Base642 = Convert.ToBase64String(byteArray);

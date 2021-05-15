@@ -4,14 +4,16 @@ using Ecommerce_NetCore_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Ecommerce_NetCore_API.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20210515092835_txhistory")]
+    partial class txhistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,11 +126,8 @@ namespace Ecommerce_NetCore_API.Migrations
                     b.Property<int>("Paidamount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Paiddate")
+                    b.Property<DateTime>("paiddate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Paymentmode")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
