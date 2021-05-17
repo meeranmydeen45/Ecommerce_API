@@ -98,7 +98,35 @@ namespace Ecommerce_NetCore_API.Controllers
             }
             return Ok(result);
         }
-           
+        
+        [HttpPost("addsizes")]
+        public ActionResult<string> AddSizes([FromForm] SizesTE data)
+        {
+            string result = "";
+            data.Size = data.Size.Trim().ToUpper();
+             bool isAny = _context.Sizes.Any(x => x.Size == data.Size);
+             if(!isAny)
+            {
+                _context.Add(data);
+                _context.SaveChanges();
+                result = "Done!";
+            }
+            else
+            {
+                result = "Available Already!";
+            }
+            
+            
+            return Ok(result);
+        }
+
+        [HttpGet("getsizes")]
+        public ActionResult<List<SizesTE>>GetSizes()
+        {
+            var Sizes = _context.Sizes.ToList();
+            return Ok(Sizes);
+
+        }
            
         
     }

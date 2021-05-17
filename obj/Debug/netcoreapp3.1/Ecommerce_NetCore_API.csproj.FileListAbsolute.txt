@@ -107,7 +107,6 @@ D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.0\System.Runtime.Caching.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Runtime.Caching.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
-D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.csprojAssemblyReference.cache
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.AssemblyInfoInputs.cache
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.AssemblyInfo.cs
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.csproj.CoreCompileInputs.cache
@@ -126,3 +125,4 @@ D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.Co
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.Data.SqlClient.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.csprojAssemblyReference.cache
