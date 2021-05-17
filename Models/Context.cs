@@ -26,6 +26,7 @@ namespace Ecommerce_NetCore_API.Models
         public DbSet<BillsPendingTE> billspending { get; set; }
         public DbSet <CustomerTxHistoryTE> customertxhistory { get; set; }
         public DbSet<SizesTE> Sizes { get; set; }
+        public DbSet<ReverseEntryDataTE> reverseentrydata { get; set; }
 
 
 

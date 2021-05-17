@@ -52,14 +52,20 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("getbilldata")]
         public ActionResult<CustwithOrder> GetBillData([FromForm] BillsPendingTE billsPending)
         {
+            CustwithOrder CustWithBillAmount = new CustwithOrder();
             var BillData = _context.billspending.SingleOrDefault(x => x.Billnumber == billsPending.Billnumber);
+            if(BillData != null)
+            { 
             var CustData = _context.customers.SingleOrDefault(x => x.CustomerId == BillData.Customerid.ToString());
 
-            CustwithOrder CustWithBillAmount = new CustwithOrder()
+                CustWithBillAmount.customer = CustData;
+                CustWithBillAmount.Totalcost = BillData.Pendingamount;
+            }
+            else
             {
-                customer = CustData,
-                Totalcost = BillData.Pendingamount
-            };
+                CustWithBillAmount.customer = null;
+                CustWithBillAmount.Totalcost = 0;
+            }
             return Ok(CustWithBillAmount);
         }
 

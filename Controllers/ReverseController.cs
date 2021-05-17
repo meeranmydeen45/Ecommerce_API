@@ -10,7 +10,7 @@ namespace Ecommerce_NetCore_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-     public class ReverseController : Controller
+    public class ReverseController : Controller
     {
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly Context _context;
@@ -20,9 +20,11 @@ namespace Ecommerce_NetCore_API.Controllers
             _context = context;
         }
 
-        public ActionResult<string> GetMethod()
+        [HttpPost("reverseentry")]
+        public ActionResult<string> ReverseEntry([FromForm]ReverseEntryDataTE data)
         {
-            return Ok("String returns");
+            string result = "";
+            return Ok(result);
         }
     }
 }
