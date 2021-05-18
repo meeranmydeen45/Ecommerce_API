@@ -9,9 +9,9 @@ namespace Ecommerce_NetCore_API.Models
     public class CustomerTE
     {
         public int Id { get; set; }
-        [Required]
+       
         public string customermobile { get; set; }
-        [Required]
+      
         public string CustomerName { get; set; }
         public string Customeraddress { get; set; }
 

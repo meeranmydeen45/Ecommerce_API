@@ -54,9 +54,9 @@ namespace Ecommerce_NetCore_API.Controllers
         {
             CustwithOrder CustWithBillAmount = new CustwithOrder();
             var BillData = _context.billspending.SingleOrDefault(x => x.Billnumber == billsPending.Billnumber);
-            if(BillData != null)
-            { 
-            var CustData = _context.customers.SingleOrDefault(x => x.CustomerId == BillData.Customerid.ToString());
+            if (BillData != null)
+            {
+                var CustData = _context.customers.SingleOrDefault(x => x.CustomerId == BillData.Customerid.ToString());
 
                 CustWithBillAmount.customer = CustData;
                 CustWithBillAmount.Totalcost = BillData.Pendingamount;
@@ -104,14 +104,14 @@ namespace Ecommerce_NetCore_API.Controllers
             }
             return Ok(result);
         }
-        
+
         [HttpPost("addsizes")]
         public ActionResult<string> AddSizes([FromForm] SizesTE data)
         {
             string result = "";
             data.Size = data.Size.Trim().ToUpper();
-             bool isAny = _context.Sizes.Any(x => x.Size == data.Size);
-             if(!isAny)
+            bool isAny = _context.Sizes.Any(x => x.Size == data.Size);
+            if (!isAny)
             {
                 _context.Add(data);
                 _context.SaveChanges();
@@ -121,19 +121,76 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 result = "Available Already!";
             }
-            
-            
+
+
             return Ok(result);
         }
 
         [HttpGet("getsizes")]
-        public ActionResult<List<SizesTE>>GetSizes()
+        public ActionResult<List<SizesTE>> GetSizes()
         {
             var Sizes = _context.Sizes.ToList();
             return Ok(Sizes);
 
         }
-           
+
+        [HttpPost("getcustomerbyid")]
+        public ActionResult<CustomerTE> GetCustomerById([FromForm] CustomerTE data)
+        {
+            string result = "";
+            var Customer = _context.customers.SingleOrDefault(x => x.CustomerId == data.CustomerId);
+            if (Customer != null)
+            {
+                return Ok(Customer);
+            }
+            else
+            {
+                result = "Customer Not Found!";
+                return Ok(result);
+            }
+
+        }
+
+        [HttpPost("createcustomeraccount")]
+        public ActionResult<String> CreateCustomerAccount([FromForm] CustomerAccountTE data)
+        {
+            string result = "";
+            //Fitst Time - Needs to check Any Data Available in CustomerAccount Table
+            bool isDataAvailable =  _context.customeraccounts.Any();
+            if(isDataAvailable)
+            {
+             var isCustAvailable =   _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
+             if(isCustAvailable == null)
+             {
+                    _context.Add(data);
+                    _context.SaveChanges();
+                    result = "Account Created Successfully";
+
+             }
+             else
+             {
+                    result = "Account Available Already!";
+             }
+
+            }
+            else
+            {
+                //It will Run Just ontime for creating Table
+                _context.Add(data);
+                _context.SaveChanges();
+                result = "Account Created Successfully";
+
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("getcustomeraccount")]
+        public ActionResult<CustomerAccountTE> GetCustomerAccount([FromForm]CustomerAccountTE data)
+        {
+          var CustomerAccountData =  _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
+          return Ok(CustomerAccountData);
+        }
+            
         
     }
 }
