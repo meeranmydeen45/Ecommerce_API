@@ -13,5 +13,6 @@ namespace Ecommerce_NetCore_API.Models
         public string Size { get; set; }
         public int Quantity { get; set; }
         public int Saleprice { get; set; }
+        public DateTime Date { get; set; }
     }
 }

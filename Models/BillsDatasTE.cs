@@ -26,6 +26,8 @@ namespace Ecommerce_NetCore_API.Models
 
         public bool Ispaid { get; set; }
 
+        public bool Isbillmodified { get; set; }
+
         public int Customerid { get; set; }
     }
 }
