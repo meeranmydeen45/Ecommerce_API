@@ -141,7 +141,7 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("register")]
         public ActionResult<string> ProductRegistration([FromForm] ProductEntryData formData)
         {
-               
+                int PurchaseCost = 0;
                  
                 var ProductObj = _context.products.Single(x => x.ProductName == formData.Name);
 
@@ -153,6 +153,27 @@ namespace Ecommerce_NetCore_API.Controllers
 
                 _context.Add(prodAddHistory);
                 _context.SaveChanges();
+
+            //Make Purchase impacting the Global Cash
+            PurchaseCost = formData.Quantity * formData.Cost;
+            bool isDataAvailable = _context.cashposition.Any();
+            if (isDataAvailable)
+            {
+                int Id = _context.cashposition.Max(x => x.Id);
+                var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                CashPositionData.Globalcash -= PurchaseCost;
+                _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
+
+            }
+            else
+            {
+                CashPositionTE cashPosition = new CashPositionTE()
+                { Globalcash = PurchaseCost };
+                _context.Add(cashPosition);
+                _context.SaveChanges();
+
+            }
 
             //Make Effect in Stock Table once Product Registered
 

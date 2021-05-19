@@ -60,19 +60,45 @@ namespace Ecommerce_NetCore_API.Controllers
 
                     // Modifiying - Pending BillData Table
                        var PendingBillData = _context.billspending.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
-                        PendingBillData.Pendingamount -= BillAmountDeduction;
-
-                        if (PendingBillData.Pendingamount <= 0)
+                        int CustPreviousPendingBalance = 0;
+                        if(PendingBillData.Pendingamount < BillAmountDeduction)
+                        {
+                            CustPreviousPendingBalance = PendingBillData.Pendingamount;
+                            PendingBillData.Pendingamount = 0;
                             PendingBillData.Iscompleted = true;
+                            _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            PendingBillData.Pendingamount -= BillAmountDeduction;
 
-                        _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                        _context.SaveChanges();
+                            if (PendingBillData.Pendingamount <= 0)
+                                PendingBillData.Iscompleted = true;
+
+                            _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+                        
 
                         //Adding Reverse History in DB
                          data.Date = DateTime.Now;
                         _context.Add(data);
                         _context.SaveChanges();
 
+                        //Modifying Global Cash
+                        bool isDataAvailable = _context.cashposition.Any();
+                        if (isDataAvailable)
+                        {
+                            int Id = _context.cashposition.Max(x => x.Id);
+                            var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                            int TotalDeduction = BillAmountDeduction - CustPreviousPendingBalance;
+                            CashPositionData.Globalcash = CashPositionData.Globalcash - TotalDeduction; 
+                            _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                            _context.SaveChanges();
+
+                        }
+       
                         result = "Reverse Done!";
                     }
                     else

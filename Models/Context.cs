@@ -28,5 +28,6 @@ namespace Ecommerce_NetCore_API.Models
         public DbSet<SizesTE> Sizes { get; set; }
         public DbSet<ReverseEntryDataTE> reverseentrydata { get; set; }
         public DbSet<CustomerAccountTE> customeraccounts { get; set; }
+        public DbSet<CashPositionTE> cashposition { get; set; }
     }
 }

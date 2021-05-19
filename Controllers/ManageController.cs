@@ -78,6 +78,44 @@ namespace Ecommerce_NetCore_API.Controllers
                  .Single(x => x.Billnumber == bills.Billnumber && x.Customerid == bills.Customerid);
             if (BillData != null)
             {
+                if(bills.Paymentmode == "ACCOUNT")
+                {
+                 var CustAccountData = _context.customeraccounts.Single(x => Convert.ToInt32(x.Customerid) == bills.Customerid);
+                 if(CustAccountData != null)
+                    {
+                        CustAccountData.Availableamount -= bills.Paidamount;
+                        _context.Entry(CustAccountData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        _context.SaveChanges();
+
+                    }
+                    else
+                    {
+                        result = "Customer Account Data Not Found - Server Side";
+                    }
+
+                }
+                else if(bills.Paymentmode == "CASH")
+                {
+                    bool isDataAvailable =  _context.cashposition.Any();
+                    if(isDataAvailable)
+                    {
+                     int Id = _context.cashposition.Max(x => x.Id);
+                     var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                        CashPositionData.Globalcash += bills.Paidamount;
+                        _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        _context.SaveChanges();
+
+                    }
+                    else
+                    {
+                        CashPositionTE cashPosition = new CashPositionTE()
+                        {Globalcash = bills.Paidamount };
+                        _context.Add(cashPosition);
+                        _context.SaveChanges();
+
+                    }
+
+                }
                 BillData.Pendingamount = BillData.Pendingamount - bills.Paidamount;
 
                 if (BillData.Pendingamount == 0)
@@ -85,13 +123,13 @@ namespace Ecommerce_NetCore_API.Controllers
 
                 _context.Entry(BillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
-                string paymode = Convert.ToInt32(bills.Paymentmode) == 1 ? "Cash" : "Account";
+                
                 CustomerTxHistoryTE customer = new CustomerTxHistoryTE()
                 {
                     Billnumber = bills.Billnumber,
                     Paidamount = bills.Paidamount,
                     Paiddate = DateTime.Now.Date,
-                    Paymentmode = paymode,
+                    Paymentmode = bills.Paymentmode,
                     Customerid = bills.Customerid
                 };
                 _context.Add(customer);
@@ -189,6 +227,31 @@ namespace Ecommerce_NetCore_API.Controllers
         {
           var CustomerAccountData =  _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
           return Ok(CustomerAccountData);
+        }
+
+       [HttpGet("getglobalcash")]
+       public ActionResult<int> GetGlobalCash()
+        {
+            int Cashposition = 0;
+            bool isDataAvailable = _context.cashposition.Any();
+            if (isDataAvailable)
+            {
+                int Id = _context.cashposition.Max(x => x.Id);
+                var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                Cashposition = CashPositionData.Globalcash;
+
+            }
+            else
+            {
+                //It will Run Just One Time in Entire Application
+                CashPositionTE cashPosition = new CashPositionTE()
+                { Globalcash = 0 };
+                _context.Add(cashPosition);
+                _context.SaveChanges();
+                Cashposition = 0;
+
+            }
+            return Ok(Cashposition);
         }
             
         
