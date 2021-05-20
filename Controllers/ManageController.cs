@@ -78,10 +78,10 @@ namespace Ecommerce_NetCore_API.Controllers
                  .Single(x => x.Billnumber == bills.Billnumber && x.Customerid == bills.Customerid);
             if (BillData != null)
             {
-                if(bills.Paymentmode == "ACCOUNT")
+                if (bills.Paymentmode == "ACCOUNT")
                 {
-                 var CustAccountData = _context.customeraccounts.Single(x => Convert.ToInt32(x.Customerid) == bills.Customerid);
-                 if(CustAccountData != null)
+                    var CustAccountData = _context.customeraccounts.Single(x => Convert.ToInt32(x.Customerid) == bills.Customerid);
+                    if (CustAccountData != null)
                     {
                         CustAccountData.Availableamount -= bills.Paidamount;
                         _context.Entry(CustAccountData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
@@ -94,13 +94,13 @@ namespace Ecommerce_NetCore_API.Controllers
                     }
 
                 }
-                else if(bills.Paymentmode == "CASH")
+                else if (bills.Paymentmode == "CASH")
                 {
-                    bool isDataAvailable =  _context.cashposition.Any();
-                    if(isDataAvailable)
+                    bool isDataAvailable = _context.cashposition.Any();
+                    if (isDataAvailable)
                     {
-                     int Id = _context.cashposition.Max(x => x.Id);
-                     var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                        int Id = _context.cashposition.Max(x => x.Id);
+                        var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
                         CashPositionData.Globalcash += bills.Paidamount;
                         _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                         _context.SaveChanges();
@@ -109,7 +109,7 @@ namespace Ecommerce_NetCore_API.Controllers
                     else
                     {
                         CashPositionTE cashPosition = new CashPositionTE()
-                        {Globalcash = bills.Paidamount };
+                        { Globalcash = bills.Paidamount };
                         _context.Add(cashPosition);
                         _context.SaveChanges();
 
@@ -123,7 +123,7 @@ namespace Ecommerce_NetCore_API.Controllers
 
                 _context.Entry(BillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
-                
+
                 CustomerTxHistoryTE customer = new CustomerTxHistoryTE()
                 {
                     Billnumber = bills.Billnumber,
@@ -194,21 +194,21 @@ namespace Ecommerce_NetCore_API.Controllers
         {
             string result = "";
             //Fitst Time - Needs to check Any Data Available in CustomerAccount Table
-            bool isDataAvailable =  _context.customeraccounts.Any();
-            if(isDataAvailable)
+            bool isDataAvailable = _context.customeraccounts.Any();
+            if (isDataAvailable)
             {
-             var isCustAvailable =   _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
-             if(isCustAvailable == null)
-             {
+                var isCustAvailable = _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
+                if (isCustAvailable == null)
+                {
                     _context.Add(data);
                     _context.SaveChanges();
                     result = "Account Created Successfully";
 
-             }
-             else
-             {
+                }
+                else
+                {
                     result = "Account Available Already!";
-             }
+                }
 
             }
             else
@@ -223,10 +223,151 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("getcustomeraccount")]
-        public ActionResult<CustomerAccountTE> GetCustomerAccount([FromForm]CustomerAccountTE data)
+        public ActionResult<CustomerAccountTE> GetCustomerAccount([FromForm] CustomerAccountTE data)
         {
-          var CustomerAccountData =  _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
-          return Ok(CustomerAccountData);
+            var CustomerAccountData = _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
+            return Ok(CustomerAccountData);
+        }
+
+        [HttpGet("getallpendingbills")]
+        public ActionResult<List<PendingBills>> GetAllPendingBills()
+        {
+            List<PendingBills> PendingBillswithName = new List<PendingBills>();
+            var isAnyData = _context.billspending.Any();
+            if (isAnyData)
+            {
+                var PendingBills = _context.billspending.Where(x => x.Iscompleted == false).ToList();
+                foreach (BillsPendingTE bill in PendingBills)
+                {
+                    var Customer = _context.customers.Single(x => x.CustomerId == bill.Customerid.ToString());
+                    PendingBills PendingBill = new PendingBills()
+                    {
+                        Billnumber = bill.Billnumber.ToString(),
+                        Pendingamount = bill.Pendingamount,
+                        Customerid = Customer.CustomerId,
+                        Customermobile = Customer.customermobile,
+                        Customername = Customer.CustomerName
+                    };
+                    PendingBillswithName.Add(PendingBill);
+                }
+            }
+            return Ok(PendingBillswithName);
+
+        }
+
+        [HttpPost("getpendingbillsbycustomer")]
+        public ActionResult<List<PendingBills>> GetPendingBillByCustomerValue([FromForm]PendingBills data)
+        {
+
+         string TextBoxValue =   data.TextBoxValue.Trim();
+         string SearchCriteria = data.SearchCriteria;
+            string Result = "";
+            List<PendingBills> PendingBillsWithName = new List<PendingBills>();
+            CustomerTE Customer = new CustomerTE();
+            List<BillsPendingTE> PendingBills = new List<BillsPendingTE>();
+         var isAnyData = _context.billspending.Any();
+            if (isAnyData)
+            {
+                
+                if(SearchCriteria != "CUSTOMERID")
+                {
+                    if (SearchCriteria == "CUSTOMERMOBILE")
+                    {
+                      Customer = _context.customers.SingleOrDefault(x => x.customermobile == TextBoxValue);
+                     if(Customer != null)
+                        {
+                         PendingBills = _context.billspending.
+                                Where(x => x.Customerid.ToString() == Customer.CustomerId && x.Iscompleted == false).ToList();
+                            if (PendingBills == null)
+                            {
+                                Result = "No Pending Bill Available for" + Customer.CustomerName;
+                            }
+                        }
+                        else
+                        {
+                            Result = "Match Not Found with Mobile";
+                        }
+                    }
+                    else if(SearchCriteria  == "CUSTOMERNAME")
+                    {
+
+                        Customer = _context.customers.SingleOrDefault(x => x.CustomerName.ToUpper() == TextBoxValue.ToUpper());
+                        if (Customer != null)
+                        {
+                            PendingBills = _context.billspending.
+                                   Where(x => x.Customerid.ToString() == Customer.CustomerId && x.Iscompleted == false).ToList();
+                            if (PendingBills == null)
+                            {
+                                Result = "No Pending Bill Available for" + Customer.CustomerName;
+                            }
+                        }
+                        else
+                        {
+                            Result = "Not Found with Name";
+                        }
+
+                    }
+                }
+                else if(SearchCriteria == "CUSTOMERID")
+                {
+                   Customer = _context.customers.SingleOrDefault(x => x.CustomerId == TextBoxValue);
+                    if (Customer != null)
+                    {
+                        PendingBills = _context.billspending.Where(x => x.Customerid.ToString() == TextBoxValue && x.Iscompleted == false).ToList();
+                        if(PendingBills == null)
+                        {
+                            Result = "No Pending Bill Available for" + Customer.CustomerName;
+                        }
+                    }
+                    else
+                    {
+                        Result = "Not Found with ID";
+                    }
+                   
+
+                }
+            }
+            // Iterating throug all Pending Bills and adding Customer Name and Mobile
+            if(PendingBills.Count > 0)
+            { 
+            foreach(var billData in PendingBills)
+            {
+                PendingBills bill = new PendingBills()
+                {
+                    Billnumber = billData.Billnumber.ToString(),
+                    Pendingamount = billData.Pendingamount,
+                    Customerid = billData.Customerid.ToString(),
+                    Customermobile = Customer.customermobile.ToString(),
+                    Customername = Customer.CustomerName
+                };
+                PendingBillsWithName.Add(bill);
+            }
+                return Ok(PendingBillsWithName);
+            }
+            else
+            {
+                PendingBillsWithName = null;
+                return Ok(Result);
+            }
+
+           
+        }
+
+        [HttpPost("getpdfbillbyno")]
+        public ActionResult<string> GetPDFByBillNumber([FromForm]PendingBills data)
+        {
+          var BillData =  _context.billscollections.SingleOrDefault(x => x.Billnumber.ToString() == data.Billnumber);
+         if(BillData != null)
+            {
+                byte[] ByteArray = BillData.Billbytearray;
+                string Base64 = Convert.ToBase64String(ByteArray);
+                return Ok(Base64);
+            }
+            else
+            {
+                string result = string.Empty;
+                return Ok(result);
+            }
         }
 
        [HttpGet("getglobalcash")]
