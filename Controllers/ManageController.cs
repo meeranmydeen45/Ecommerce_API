@@ -395,6 +395,63 @@ namespace Ecommerce_NetCore_API.Controllers
             return Ok(Cashposition);
         }
             
-        
+       [HttpGet("getaccountdetails")]
+       public ActionResult<CustomerAccountTE> GetCustomerAccount(string SearchValue)
+        {
+            string Searchvalue = SearchValue.Trim();
+            string Result = "";
+            CustomerAccountTE CustomerAccountInfo = new CustomerAccountTE();
+            CustomerAccountInfo = _context.customeraccounts.SingleOrDefault(x => x.Customerid == Searchvalue);
+            if(CustomerAccountInfo == null)
+            {
+                var CustomerData =  _context.customers.SingleOrDefault(x => x.customermobile == Searchvalue);
+                if (CustomerData != null)
+                {
+                    CustomerAccountInfo =  _context.customeraccounts.SingleOrDefault(x => x.Customerid == CustomerData.CustomerId);
+                    if(CustomerAccountInfo != null)
+                    {
+                        return Ok(CustomerAccountInfo);
+                    }
+                    else
+                    {
+                        Result = "Customer Dont Have Account Credit";
+                        return Ok(Result);
+                    }
+
+                }
+                else
+                {
+                    
+                    Result = "Mobile or CustID doesn't match with any Customer";
+                    return Ok(Result);
+                }
+            }
+            else
+            {
+                return Ok(CustomerAccountInfo);
+            }
+            
+        }
+
+        [HttpPost("credittocustaccount")]
+        public ActionResult<String> SetCreditToCustomerAccount([FromForm]CustomerAccountTE data)
+        {
+          string Result = "";
+          var CustomerAccount =  _context.customeraccounts.SingleOrDefault(x => x.Customerid == data.Customerid);
+          if(CustomerAccount != null)
+           {
+                CustomerAccount.Availableamount += data.Availableamount;
+                _context.Entry(CustomerAccount).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
+                 Result = "Credit Successfully";
+
+            }
+          else
+            {
+                Result = "Failed";
+
+            }
+          return Ok(Result);
+        }
     }
 }
