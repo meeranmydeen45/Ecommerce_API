@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects.DataClasses;
 using System.IO;
@@ -277,41 +278,57 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("customer-registration")]
-        public ActionResult<string> CustomerRegistration([FromForm] CustomerTE customer)
+        public ActionResult<string> CustomerRegistration([FromForm] CustomerTE customer, bool update)
         {
-            bool Notempty = _context.customers.Any();     // Whether table Empty
-            if (Notempty)
+            string Result = "";
+            //If Want to Update Customer Mobile and Address
+            if (update)
             {
-                int MaxIdValue = _context.customers.Max(x => x.Id);
-                CustomerTE CustwithMaxId = _context.customers.Single(x => x.Id == MaxIdValue);
-                CustomerTE IsExistingCust = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
-                if (IsExistingCust != null)
-                {   
-                    //If customer Mob. Match with Existing Cust. Just update Mobile No. and Address
-                    IsExistingCust.customermobile = customer.customermobile;
-                    IsExistingCust.Customeraddress = customer.Customeraddress;
-                    _context.Entry(IsExistingCust).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                var CustomerDataForUpdate = _context.customers.Single(x => x.CustomerId == customer.CustomerId);
+                if (CustomerDataForUpdate != null)
+                {
+                    CustomerDataForUpdate.customermobile = customer.customermobile;
+                    CustomerDataForUpdate.Customeraddress = customer.Customeraddress;
+                    _context.Entry(CustomerDataForUpdate).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();
+                    Result = "Update Successfully";
+                }
+            }
+            else
+            {
+                bool isAnyData = _context.customers.Any();
+                if (isAnyData)
+                {
+                    int MaxIdValue = _context.customers.Max(x => x.Id);
+                    CustomerTE CustwithMaxId = _context.customers.Single(x => x.Id == MaxIdValue);
+                    CustomerTE IsExistingCust = _context.customers.SingleOrDefault(x => x.customermobile == customer.customermobile);
+                    if(IsExistingCust == null)
+                    {
+                        //If will get Last row CustId and Increase it By 1 and update CustId with New Customer
+                        customer.CustomerId = (Convert.ToInt32(CustwithMaxId.CustomerId) + 1).ToString();
+                        _context.Add(customer);
+                        _context.SaveChanges();
+                        Result = "Customer Registered Successfully";
+
+                    }
+                    else
+                    {
+                        Result = "Mobile No Registered with Mr. " + IsExistingCust.CustomerName;
+                    }
                 }
                 else
                 {
-                    //If will get Last row CustId and Increase it By 1 and update CustId with New Customer
-                    customer.CustomerId = (Convert.ToInt32(CustwithMaxId.CustomerId) + 1).ToString();
+                    //First time for creation Customer Table
+                    int custId = 10100001;
+                    customer.CustomerId = custId.ToString();
                     _context.Add(customer);
                     _context.SaveChanges();
+                    Result = "Congratulation 1 Customer Registered Successfully";
+
                 }
             }
-            // If there is no row in Cust. Table
-            else
-            {
-                int custId = 10100001;
-                customer.CustomerId = custId.ToString();
-                _context.Add(customer);
-                _context.SaveChanges();
-            }
-            return Ok("Saved");
+            return Ok(Result);
         }
-    
 
         [HttpPost("pruchase")]
         public  ActionResult<string> PurchaseStock(CustwithOrder custwithOrder) 
