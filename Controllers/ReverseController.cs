@@ -61,7 +61,7 @@ namespace Ecommerce_NetCore_API.Controllers
                     // Modifiying - Pending BillData Table
                        var PendingBillData = _context.billspending.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
                         int CustPreviousPendingBalance = 0;
-                        if(PendingBillData.Pendingamount < BillAmountDeduction)
+                        if(PendingBillData.Pendingamount <= BillAmountDeduction)
                         {
                             CustPreviousPendingBalance = PendingBillData.Pendingamount;
                             PendingBillData.Pendingamount = 0;
@@ -88,7 +88,7 @@ namespace Ecommerce_NetCore_API.Controllers
 
                         //Modifying Global Cash
                         bool isDataAvailable = _context.cashposition.Any();
-                        if (isDataAvailable)
+                        if (isDataAvailable && PendingBillData.Pendingamount < BillAmountDeduction)
                         {
                             int Id = _context.cashposition.Max(x => x.Id);
                             var CashPositionData = _context.cashposition.Single(x => x.Id == Id);

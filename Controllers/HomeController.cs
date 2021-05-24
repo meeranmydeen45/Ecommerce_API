@@ -150,6 +150,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 prodAddHistory.Quantity = formData.Quantity;
                 prodAddHistory.Cost = formData.Cost;
                 prodAddHistory.Size = formData.Size;
+                prodAddHistory.Date = DateTime.Now.Date;
                 prodAddHistory.ProductId = ProductObj.Id;
 
                 _context.Add(prodAddHistory);

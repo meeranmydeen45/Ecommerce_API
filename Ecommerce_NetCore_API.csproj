@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\ViewTemplateModel01.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Models\lt4hrgsr.0de~" />
   </ItemGroup>
 
