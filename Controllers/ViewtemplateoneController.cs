@@ -28,7 +28,7 @@ namespace Ecommerce_NetCore_API.Controllers
         }
 
         [HttpPost("prodaddhistory")]
-        public ActionResult<List<ProdAddHistoryTE>> GetProductRegisteredHistory([FromForm]ViewTemplateModelOne data)
+        public ActionResult<List<ProdAddHistoryReportModel>> GetProductRegisteredHistory([FromForm]ViewTemplateModelOne data, string groupvalue)
         {
             bool IsFromDateValid = false;
             bool IsEndDateValid = false;
@@ -37,9 +37,15 @@ namespace Ecommerce_NetCore_API.Controllers
             DateTime EndDate;
             string CompleteEndDateString ="";
             DateTime dt;
-            List<ProdAddHistoryTE> products = new List<ProdAddHistoryTE>();
+            bool SelectOne = false;
+            bool SelectTwo = false;
+            bool SelectThree = false;
+           List<ProdAddHistoryTE> products = new List<ProdAddHistoryTE>();
+           List<ProdAddHistoryReportModel> ReportModelList = new List<ProdAddHistoryReportModel>();
+           //List<List<ProdAddHistoryTE>> TotalCollection = new List<List<ProdAddHistoryTE>>();
             string Result = "";
             bool NotFound = false;
+            bool IsGroup = groupvalue == "GROUP" ? true : false;
 
             if (data.FromDate != null && data.EndDate != null)
             {
@@ -56,38 +62,129 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 FromDate = Convert.ToDateTime(CompleteFromDateString);
                 EndDate =  Convert.ToDateTime(CompleteEndDateString);
-
-                if(data.ProductValue != null && data.SizeValue == null)
+                if(data.CategoryValue != null && data.ProductValue == null && data.SizeValue == null)
                 {
-                 var ProductsRegistered = context
-                        .prodAddHistoryData
-                        .Where(x => x.Date >= FromDate && x.Date <= EndDate && x.ProductId.ToString() == data.ProductValue).ToList();
-                    if (ProductsRegistered.Count() != 0)
+                    SelectOne = true;
+                    var ProductsByCategoryId =  context.products.Where(x => x.CategoryId.ToString() == data.CategoryValue).ToList();
+                    if(ProductsByCategoryId.Count() != 0)
                     {
-                        products = ProductsRegistered.ToList();
+                        
+                        foreach(var ProductsById in ProductsByCategoryId)
+                        { 
+                            var collection = context.prodAddHistoryData.Where(x => x.ProductId == ProductsById.Id && x.Date >= FromDate && x.Date <= EndDate).OrderBy(x => x.Size).ToList();
+                            foreach(var prod in collection)
+                            {
+                                products.Add(prod);
+                            }
+                        }
+                       // return Ok(products);
                     }
                     else
                     {
-                        Result = "Not Found.. Change Your Search Criteria!";
+                        Result = "NotFound";
+                        NotFound = true;
+                    }
+                }
+                else if(data.ProductValue != null && data.SizeValue == null)
+                {
+                    SelectTwo = true;
+                    var DataCollection = context
+                           .prodAddHistoryData
+                           .Where(x => x.ProductId.ToString() == data.ProductValue && x.Date >= FromDate && x.Date <= EndDate).OrderBy(x => x.Size).ToList();
+                    if (DataCollection.Count() != 0)
+                    {
+                        
+                        products = DataCollection;
+                    }
+                    else
+                    {
+                        Result = "NotFound";
                         NotFound = true;
                     }
 
                 }
-                
-                if(data.ProductValue !=null && data.SizeValue != null)
+                else if(data.ProductValue !=null && data.SizeValue != null)
                 {
+                    SelectThree = true;
+                    var  DataBySize = context.prodAddHistoryData
+                        .Where(x => x.ProductId.ToString() == data.ProductValue && x.Size == data.SizeValue && x.Date >= FromDate && x.Date <= EndDate).ToList();
+                    if(DataBySize.Count() > 0)
+                    {
+                        products = DataBySize;
+
+                    }
+                    else
+                    {
+                        Result = "NotFound";
+                        NotFound = true;
+
+                    }
 
                 }
+                if(products.Count() > 0 && SelectOne && IsGroup)
+                {
+                  var GroupBySizeSelectOne =  products.GroupBy(x => new { x.ProductId, x.Size }).Select(z => new ProdAddHistoryTE() { 
+                      ProductId = z.Key.ProductId,
+                      Size = z.Key.Size,
+                      Quantity = z.Sum(x => x.Quantity),
+                      Cost = z.Sum(x => x.Cost) / z.Count(),
+                    });
+                    products = GroupBySizeSelectOne.ToList();
 
+                }
+                else if(products.Count() > 0 && SelectTwo && IsGroup)
+                {
+                    var GroupBySelectTwo = products.GroupBy(x => x.Size).Select(z => new ProdAddHistoryTE() { 
+                      ProductId = products[0].ProductId,
+                      Size = z.Key,
+                      Quantity = z.Sum(x => x.Quantity),
+                      Cost = z.Sum(x => x.Cost) / z.Count(),
+                    });
+                    products = GroupBySelectTwo.ToList();
+                }
+                else if (products.Count() > 0 && SelectThree && IsGroup)
+                {
+                    ProdAddHistoryTE SelectThreeData = new ProdAddHistoryTE()
+                    {
+                        ProductId = products[0].ProductId,
+                        Size = products[0].Size,
+                        Quantity = products.Sum(x => x.Quantity),
+                        Cost = products.Sum(x=> x.Cost) / products.Count()
+
+                    };
+                    products.Clear();
+                    products.Add(SelectThreeData);
+                }
+                //Produt Name not avilable in products thats why converting into new Model with productName!!
+                if(products.Count() > 0)
+                {
+                    foreach(var prod in products)
+                    {
+                        ProductNameService NameService = new ProductNameService(context);
+                        ProdAddHistoryReportModel model = new ProdAddHistoryReportModel()
+                        {
+                            Productname = NameService.GetProductName(prod.ProductId),
+                            Size = prod.Size,
+                            Quantity = prod.Quantity,
+                            Cost = prod.Cost,
+                            Date = prod.Date,
+                            Productid = prod.ProductId
+                            
+                        };
+                        ReportModelList.Add(model);
+                    }
+
+                }
+                else
+                {
+                    NotFound = true;
+                }
             }
-
-
-            
             if(NotFound)
             {
                 return Ok(Result);
             }
-            return Ok(products);
+            return Ok(ReportModelList);
 
         }
 
