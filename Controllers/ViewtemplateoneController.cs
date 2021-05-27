@@ -522,15 +522,15 @@ namespace Ecommerce_NetCore_API.Controllers
                         {
                             var ProductRegistered =  ProdRegGrouped.Single(x => x.ProductId == ProductSold.Productid && x.Size == ProductSold.Prodsize);
                             ProductNameService NameService = new ProductNameService(context);
-                            ProdProfitReportModel model = new ProdProfitReportModel()
-                            {
-                              Productname = NameService.GetProductName(ProductSold.Productid),
-                              Size = ProductSold.Prodsize,
-                              Purchasecostaverage = ProductRegistered.Cost,
-                              Salecostaverage = ProductSold.Unitprice,
-                              Quantitysold =  ProductSold.Quantity,
-                              Profit = ProductSold.Quantity * ProductSold.Unitprice - ProductSold.Quantity * ProductRegistered.Cost,
-                            };
+                            ProductProfitService profitService = new ProductProfitService(context);
+                            ProdProfitReportModel model = new ProdProfitReportModel();
+                            model.Productname = NameService.GetProductName(ProductSold.Productid);
+                            model.Size = ProductSold.Prodsize;
+                            model.Purchasecostaverage = ProductRegistered.Cost;
+                            model.Salecostaverage = ProductSold.Unitprice;
+                            model.Quantitysold = ProductSold.Quantity;
+                            model.Profit = profitService.GetProductProfit(ProductSold.Productid, ProductSold.Prodsize);
+
                             ReportModel.Add(model);
                         }
                     
@@ -538,6 +538,8 @@ namespace Ecommerce_NetCore_API.Controllers
 
                 }
             }
+
+               //
                if(NotFound)
                {
                 return Ok(Result);

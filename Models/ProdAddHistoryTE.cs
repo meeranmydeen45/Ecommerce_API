@@ -15,6 +15,7 @@ namespace Ecommerce_NetCore_API.Models
         [Required]
         public int Cost { get; set; }
         public string Size { get; set; }
+        public int Totalcost { get; set; }
         [Required]
         public DateTime Date { get; set; }
         [Required]
