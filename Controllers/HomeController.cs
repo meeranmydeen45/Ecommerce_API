@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ecommerce_NetCore_API.Models;
+using Ecommerce_NetCore_API.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpGet("Get")]
         public ActionResult<String> GetAll()
         {
-
+           
             return Ok("Debugger Checking");
 
 
@@ -151,7 +152,7 @@ namespace Ecommerce_NetCore_API.Controllers
                 prodAddHistory.Cost = formData.Cost;
                 prodAddHistory.Size = formData.Size;
                 prodAddHistory.Totalcost = formData.Quantity * formData.Cost;
-                prodAddHistory.Date = DateTime.Now.Date;
+                prodAddHistory.Date = DateTime.Now;
                 prodAddHistory.ProductId = ProductObj.Id;
 
                 _context.Add(prodAddHistory);
@@ -344,7 +345,7 @@ namespace Ecommerce_NetCore_API.Controllers
                     Quantity = item.Quantity,
                     Unitprice = item.cost,
                     TotalCost = item.Quantity * item.cost,
-                    Purchasedate = DateTime.Now.Date,
+                    Purchasedate = DateTime.Now,
                     Productid = item.id,
                     Custid = custwithOrder.customer.CustomerId
 

@@ -51,11 +51,11 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 
                 DateService DateService1 = new DateService();
-                CompleteFromDateString = DateService1.GetCompleteDate(data.FromDate);
+                CompleteFromDateString = DateService1.GetCompleteFromDate(data.FromDate);
                 IsFromDateValid = DateTime.TryParse(CompleteFromDateString, out dt);
 
                 DateService DateService2 = new DateService();
-                CompleteEndDateString = DateService2.GetCompleteDate(data.EndDate);
+                CompleteEndDateString = DateService2.GetCompleteEndDate(data.EndDate);
                 IsEndDateValid = DateTime.TryParse(CompleteEndDateString, out dt);
             }
             if(IsFromDateValid && IsEndDateValid)
@@ -213,11 +213,11 @@ namespace Ecommerce_NetCore_API.Controllers
             {
                 
                 DateService DateService1 = new DateService();
-        CompleteFromDateString = DateService1.GetCompleteDate(data.FromDate);
+        CompleteFromDateString = DateService1.GetCompleteFromDate(data.FromDate);
                 IsFromDateValid = DateTime.TryParse(CompleteFromDateString, out dt);
 
                 DateService DateService2 = new DateService();
-        CompleteEndDateString = DateService2.GetCompleteDate(data.EndDate);
+        CompleteEndDateString = DateService2.GetCompleteEndDate(data.EndDate);
                 IsEndDateValid = DateTime.TryParse(CompleteEndDateString, out dt);
             }
             if(IsFromDateValid && IsEndDateValid)
@@ -381,12 +381,13 @@ namespace Ecommerce_NetCore_API.Controllers
             {
 
                 DateService DateService1 = new DateService();
-                CompleteFromDateString = DateService1.GetCompleteDate(data.FromDate);
+                CompleteFromDateString = DateService1.GetCompleteFromDate(data.FromDate);
                 IsFromDateValid = DateTime.TryParse(CompleteFromDateString, out dt);
-
+                
                 DateService DateService2 = new DateService();
-                CompleteEndDateString = DateService2.GetCompleteDate(data.EndDate);
+                CompleteEndDateString = DateService2.GetCompleteEndDate(data.EndDate);
                 IsEndDateValid = DateTime.TryParse(CompleteEndDateString, out dt);
+               
             }
             if (IsFromDateValid && IsEndDateValid)
             {

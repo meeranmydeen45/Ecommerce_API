@@ -8,7 +8,7 @@ namespace Ecommerce_NetCore_API.Services
     public class DateService
     {
 
-        public string GetCompleteDate(string DateString)
+        /*public string GetCompleteDate(string DateString)
         {
            string[] ArrayString = DateString.Split(" ");
            int Month = GetMonth(ArrayString[1]);
@@ -17,6 +17,30 @@ namespace Ecommerce_NetCore_API.Services
            string CompleteDate = Month.ToString() + " /" + Date + " /" + Year;
 
            return CompleteDate;
+        }*/
+
+        public string GetCompleteFromDate(string FromDate)
+        {
+            string[] ArrayString = FromDate.Split(" ");
+            int Month = GetMonth(ArrayString[1]);
+            string Date = ArrayString[2];
+            string Year = ArrayString[3];
+            string CompleteDate = Month.ToString() + " /" + Date + " /" + Year;
+
+            return CompleteDate+" 00:00";
+
+        }
+
+        public string GetCompleteEndDate(string EndDate)
+        {
+            string[] ArrayString = EndDate.Split(" ");
+            int Month = GetMonth(ArrayString[1]);
+            string Date = ArrayString[2];
+            string Year = ArrayString[3];
+            string CompleteDate = Month.ToString() + " /" + Date + " /" + Year;
+
+            return CompleteDate + " 23:59";
+
         }
 
         public int GetMonth(string Month)
@@ -52,5 +76,8 @@ namespace Ecommerce_NetCore_API.Services
             }
            
         }
+
+
+        
     }
 }
