@@ -1,4 +1,5 @@
 ﻿using Ecommerce_NetCore_API.Models;
+using Ecommerce_NetCore_API.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,100 +24,110 @@ namespace Ecommerce_NetCore_API.Controllers
         [HttpPost("reverseentry")]
         public ActionResult<string> ReverseEntry([FromForm] ReverseEntryDataTE data)
         {
-            string result = "";
-            int UnitPrice = 0;
+            string result = "Not Done";            
             int ProfitDeduction = 0;
             int BillAmountDeduction = 0;
             List<ProdAddHistoryTE> products = _context.prodAddHistoryData
                  .Where(x => x.ProductId == data.Productid && x.Size == data.Size).ToList();
-            if (products != null)
+            /*if (products != null)
             { 
                 int Total = 0;
             foreach (var prod in products)
             {
                 Total += prod.Cost;
-            }
-            UnitPrice = Total / products.Count;
-            ProfitDeduction = data.Quantity * data.Saleprice - data.Quantity * UnitPrice;
+            }*/
+            //UnitPrice = Total / products.Count;
+            ProductProfitService profitService = new ProductProfitService(_context);
+            ProfitDeduction = profitService
+              .CalculatingProductProfitForReversalProduct(data.Productid, data.Size, data.Billnumber, data.Quantity, data.Saleprice);
             BillAmountDeduction = data.Quantity * data.Saleprice;
-              var stock = _context.stocks
-                          .SingleOrDefault(x => x.ProductId == data.Productid && x.Size.ToUpper() == data.Size.ToUpper());
-                if(stock != null)
+            var stock = _context.stocks
+                        .SingleOrDefault(x => x.ProductId == data.Productid && x.Size.ToUpper() == data.Size.ToUpper());
+            if (stock != null)
+            {
+                stock.Quantity += data.Quantity;
+                _context.Entry(stock).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
+
+               
+
+                //Modifying Bill Table
+                var BillData = _context.billscollections.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
+                if (BillData != null)
                 {
-                    stock.Quantity += data.Quantity;
-                    _context.Entry(stock).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    BillData.Billamount -= BillAmountDeduction;
+                    BillData.Payableamount -= BillAmountDeduction;
+                    BillData.Billprofit -= ProfitDeduction;
+                    BillData.Isbillmodified = true;
+                    _context.Entry(BillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();
 
-                    //Modifying Bill Table
-                   var BillData = _context.billscollections.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
-                   if(BillData != null)
-                    {
-                        BillData.Billamount -= BillAmountDeduction;
-                        BillData.Payableamount -= BillAmountDeduction;
-                        BillData.Billprofit -= ProfitDeduction;
-                        BillData.Isbillmodified = true;
-                        _context.Entry(BillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                        _context.SaveChanges();
-
                     // Modifiying - Pending BillData Table
-                       var PendingBillData = _context.billspending.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
-                        int CustPreviousPendingBalance = 0;
-                        if(PendingBillData.Pendingamount <= BillAmountDeduction)
-                        {
-                            CustPreviousPendingBalance = PendingBillData.Pendingamount;
-                            PendingBillData.Pendingamount = 0;
-                            PendingBillData.Iscompleted = true;
-                            _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            _context.SaveChanges();
-                        }
-                        else
-                        {
-                            PendingBillData.Pendingamount -= BillAmountDeduction;
-
-                            if (PendingBillData.Pendingamount <= 0)
-                                PendingBillData.Iscompleted = true;
-
-                            _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            _context.SaveChanges();
-                        }
-                        
-
-                        //Adding Reverse History in DB
-                         data.Date = DateTime.Now;
-                        _context.Add(data);
+                    var PendingBillData = _context.billspending.Single(x => x.Billnumber == Convert.ToInt32(data.Billnumber));
+                    int CustPreviousPendingBalance = 0;
+                    if (PendingBillData.Pendingamount <= BillAmountDeduction)
+                    {
+                        CustPreviousPendingBalance = PendingBillData.Pendingamount;
+                        PendingBillData.Pendingamount = 0;
+                        PendingBillData.Iscompleted = true;
+                        _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                         _context.SaveChanges();
-
-                        //Modifying Global Cash
-                        bool isDataAvailable = _context.cashposition.Any();
-                        if (isDataAvailable && PendingBillData.Pendingamount < BillAmountDeduction)
-                        {
-                            int Id = _context.cashposition.Max(x => x.Id);
-                            var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
-                            int TotalDeduction = BillAmountDeduction - CustPreviousPendingBalance;
-                            CashPositionData.Globalcash = CashPositionData.Globalcash - TotalDeduction; 
-                            _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                            _context.SaveChanges();
-
-                        }
-       
-                        result = "Reverse Done!";
                     }
                     else
                     {
-                        result = "Bill Not Found";
+                        PendingBillData.Pendingamount -= BillAmountDeduction;
+
+                        if (PendingBillData.Pendingamount <= 0)
+                            PendingBillData.Iscompleted = true;
+
+                        _context.Entry(PendingBillData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        _context.SaveChanges();
                     }
+
+                    //Modifying SaleHistoryTable
+                   var SaleTableData = _context.saleswithCustomerIds
+                        .Single(x => x.Custid == BillData.Customerid.ToString() 
+                        && x.Productid == data.Productid 
+                        && x.Prodsize == data.Size 
+                        && x.Purchasedate <= BillData.Billdate);
+                    SaleTableData.Quantity -= data.Quantity;
+                    SaleTableData.TotalCost -= data.Quantity * data.Saleprice;
+                    _context.Entry(SaleTableData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    _context.SaveChanges();
+
+                    //Adding Reverse History in DB
+                    data.Date = DateTime.Now;
+                    _context.Add(data);
+                    _context.SaveChanges();
+
+                    //Modifying Global Cash
+                    bool isDataAvailable = _context.cashposition.Any();
+                    if (isDataAvailable && PendingBillData.Pendingamount < BillAmountDeduction)
+                    {
+                        int Id = _context.cashposition.Max(x => x.Id);
+                        var CashPositionData = _context.cashposition.Single(x => x.Id == Id);
+                        int TotalDeduction = BillAmountDeduction - CustPreviousPendingBalance;
+                        CashPositionData.Globalcash = CashPositionData.Globalcash - TotalDeduction;
+                        _context.Entry(CashPositionData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        _context.SaveChanges();
+
+                    }
+
+                    result = "Reverse Done!";
                 }
                 else
                 {
-                    result = "Stock Not Found";
+                    result = "Bill Not Found";
                 }
             }
             else
             {
-                result = "Product Not Found";
+                result = "Stock Not Found";
             }
 
             return Ok(result);
         }
+        
     }
+    
 }

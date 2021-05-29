@@ -371,22 +371,16 @@ namespace Ecommerce_NetCore_API.Controllers
             int Totalprofit = 0;
             foreach (CartItems item in custwithOrder.cartItems)
             {
-                List<Profitmodel> data = new List<Profitmodel>();
-                data = _context.prodAddHistoryData.Where(x => x.ProductId == item.id && x.Size == item.size)
-                    .GroupBy(x => new { x.ProductId, x.Size })
-                        .Select(s => new Profitmodel()
-                        {
-                            Productid = s.Key.ProductId,
-                            Size = s.Key.Size,
-                            Profit = item.cost - s.Sum(x => x.Cost) / s.Count(),
-                            Quantity = item.Quantity
-
-                        }).ToList<Profitmodel>();
-                Datas.Add(data[0]);
+                
+                ProductProfitService profitService = new ProductProfitService(_context);
+                Profitmodel model = new Profitmodel();
+                model.Profit = profitService
+                .CalculatingProductProfitFoCurrentPruchase(item.id, item.size, item.Quantity, item.cost);
+                Datas.Add(model);
             }
             foreach(var data in Datas)
             {
-                Totalprofit = Totalprofit +  (data.Profit * data.Quantity);
+                Totalprofit += data.Profit;
 
             }
             

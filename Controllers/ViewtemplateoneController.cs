@@ -530,7 +530,7 @@ namespace Ecommerce_NetCore_API.Controllers
                             model.Purchasecostaverage = ProductRegistered.Cost;
                             model.Salecostaverage = ProductSold.Unitprice;
                             model.Quantitysold = ProductSold.Quantity;
-                            model.Profit = profitService.GetProductProfit(ProductSold.Productid, ProductSold.Prodsize);
+                            model.Profit = profitService.CalcuatingProductProfitBasedDateValue(ProductSold.Productid, ProductSold.Prodsize, FromDate, EndDate);
 
                             ReportModel.Add(model);
                         }
