@@ -85,14 +85,16 @@ namespace Ecommerce_NetCore_API.Controllers
                     }
 
                     //Modifying SaleHistoryTable
-                   var SaleTableData = _context.saleswithCustomerIds
-                        .Single(x => x.Custid == BillData.Customerid.ToString() 
-                        && x.Productid == data.Productid 
-                        && x.Prodsize == data.Size 
-                        && x.Purchasedate <= BillData.Billdate);
-                    SaleTableData.Quantity -= data.Quantity;
-                    SaleTableData.TotalCost -= data.Quantity * data.Saleprice;
-                    _context.Entry(SaleTableData).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    var SaleTableData = _context.saleswithCustomerIds
+                         .Where(x => x.Custid == BillData.Customerid.ToString()
+                         && x.Productid == data.Productid
+                         && x.Prodsize == data.Size
+                         && x.Purchasedate <= BillData.Billdate);
+                    int MaxId = SaleTableData.Max(x => x.Id);
+                    SalewithCustIdTE SaleTableObj = SaleTableData.Single(x => x.Id == MaxId);
+                    SaleTableObj.Quantity -= data.Quantity;
+                    SaleTableObj.TotalCost -= data.Quantity * data.Saleprice;
+                    _context.Entry(SaleTableObj).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();
 
                     //Adding Reverse History in DB

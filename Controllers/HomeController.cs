@@ -173,7 +173,7 @@ namespace Ecommerce_NetCore_API.Controllers
             else
             {
                 CashPositionTE cashPosition = new CashPositionTE()
-                { Globalcash = PurchaseCost };
+                { Globalcash = -PurchaseCost };
                 _context.Add(cashPosition);
                 _context.SaveChanges();
 
@@ -187,7 +187,7 @@ namespace Ecommerce_NetCore_API.Controllers
               var StockObj =  _context.stocks.SingleOrDefault(x => x.ProductId == prodAddHistory.ProductId && x.Size == prodAddHistory.Size);
               if(StockObj != null)
                 {
-                    StockObj.Cost = formData.Cost + 500;
+                    StockObj.Cost = formData.Cost + Convert.ToInt32(0.15 * formData.Cost) ;
                     StockObj.Quantity += formData.Quantity;
                     _context.Entry(StockObj).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                     _context.SaveChanges();

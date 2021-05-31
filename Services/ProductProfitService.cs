@@ -26,44 +26,6 @@ namespace Ecommerce_NetCore_API.Services
             return ProductUniqueSoldList;
         }
 
-        public int GetProductProfit(int ProductId, string Size)
-        {
-          var ProdSoldList =  GetAllSoldProducts(ProductId, Size);
-          var ProdPurchasedList = GetAllPurchasedProducts(ProductId, Size);
-            int TotalSaleCost = 0;
-            int TotalNoOfSoldItems = 0;
-            int TotalPurchaseCost = 0;
-            int TotalNoOfPurchaseItemsInTx = 0;
-
-            foreach(var prodSold in ProdSoldList)
-            {
-                TotalNoOfSoldItems += prodSold.Quantity;
-                TotalSaleCost = TotalSaleCost + (prodSold.Quantity * prodSold.Unitprice);
-
-            }
-            int prevQuantity = 0;
-            foreach (var prodPurchase in ProdPurchasedList)
-            {
-                TotalNoOfPurchaseItemsInTx += prodPurchase.Quantity;
-                
-                if(TotalNoOfPurchaseItemsInTx < TotalNoOfSoldItems)
-                {
-                    TotalPurchaseCost += prodPurchase.Quantity * prodPurchase.Cost;
-                    prevQuantity += prodPurchase.Quantity;
-                }
-                else if(TotalNoOfPurchaseItemsInTx > TotalNoOfSoldItems)
-                {
-                    int QuantityDiff = TotalNoOfSoldItems - prevQuantity;
-                    TotalPurchaseCost += QuantityDiff * prodPurchase.Cost;
-                }
-            }
-
-
-
-
-            return TotalSaleCost - TotalPurchaseCost;
-        }
-
         public int CalculatingProductProfitForReversalProduct(int ProductId, string Size, string BillNumber, int ReverseQuantity, int SoldPrice)
         {
             var BillObject = context.billscollections.Single(x => x.Billnumber.ToString() == BillNumber);
@@ -283,6 +245,52 @@ namespace Ecommerce_NetCore_API.Services
                 }
                 }
             }
+
+
+            return TotalSaleCost - TotalPurchaseCost;
+        }
+
+        public int GetProductLatestPurcashingPrice(int ProductId, string Size)
+        {
+            var  DataCollection = context.prodAddHistoryData.Where(x => x.ProductId == ProductId && x.Size == Size).ToList();
+            int MaxId = DataCollection.Max(x => x.Id);
+            int Cost = DataCollection.Single(x => x.Id == MaxId).Cost;
+            return Cost;
+        }
+
+        public int GetProductProfit(int ProductId, string Size)
+        {
+            var ProdSoldList = GetAllSoldProducts(ProductId, Size);
+            var ProdPurchasedList = GetAllPurchasedProducts(ProductId, Size);
+            int TotalSaleCost = 0;
+            int TotalNoOfSoldItems = 0;
+            int TotalPurchaseCost = 0;
+            int TotalNoOfPurchaseItemsInTx = 0;
+
+            foreach (var prodSold in ProdSoldList)
+            {
+                TotalNoOfSoldItems += prodSold.Quantity;
+                TotalSaleCost = TotalSaleCost + (prodSold.Quantity * prodSold.Unitprice);
+
+            }
+            int prevQuantity = 0;
+            foreach (var prodPurchase in ProdPurchasedList)
+            {
+                TotalNoOfPurchaseItemsInTx += prodPurchase.Quantity;
+
+                if (TotalNoOfPurchaseItemsInTx < TotalNoOfSoldItems)
+                {
+                    TotalPurchaseCost += prodPurchase.Quantity * prodPurchase.Cost;
+                    prevQuantity += prodPurchase.Quantity;
+                }
+                else if (TotalNoOfPurchaseItemsInTx > TotalNoOfSoldItems)
+                {
+                    int QuantityDiff = TotalNoOfSoldItems - prevQuantity;
+                    TotalPurchaseCost += QuantityDiff * prodPurchase.Cost;
+                }
+            }
+
+
 
 
             return TotalSaleCost - TotalPurchaseCost;
