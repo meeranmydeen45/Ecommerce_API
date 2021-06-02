@@ -443,6 +443,12 @@ namespace Ecommerce_NetCore_API.Controllers
                 CustomerAccount.Availableamount += data.Availableamount;
                 _context.Entry(CustomerAccount).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 _context.SaveChanges();
+
+                int MaxId = _context.cashposition.Max(x => x.Id);
+                var CashPosition = _context.cashposition.Single(x => x.Id == MaxId);
+                CashPosition.Globalcash += data.Availableamount;
+                _context.Entry(CashPosition).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
                 Result = "Credit Successfully";
 
             }

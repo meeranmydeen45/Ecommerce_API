@@ -125,4 +125,3 @@ D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.Co
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\System.Data.SqlClient.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
-D:\MyProjects\DotNetCore\Ecommerce_NetCore_API\obj\Debug\netcoreapp3.1\Ecommerce_NetCore_API.csprojAssemblyReference.cache
